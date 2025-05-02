@@ -1,34 +1,55 @@
-using HT.Common.Database;
 using HT.Common.Dto;
 
 namespace HT.Common.Services;
 
 public class InsightService(
-    JournalService journalService,
     HabitService habitService,
-    NeuralEngine neuralEngine,
-    HtContext context)
+    JournalService journalService,
+    NeuralEngine neuralEngine)
 {
-    public async Task GetInsightsAsync()
+    public async Task<List<InsightDto>> GetInsightsAsync()
     {
-        var journalLogs = await journalService.GetAllAsync();
-        var filteredHabitLogs = GetFilteredHabitLogs(journalLogs);
-        var allHabits = await habitService.GetAllAsync();
-        var x = neuralEngine.GetHabitsImportance(filteredHabitLogs, allHabits);
+        var habits = await habitService.GetAllAsync();
+
+        var journalLogs = await journalService.GetLogsAsync();
+        var filteredHabitLogs = GetFilteredJournalLogs(journalLogs);
+        var importanceMap = neuralEngine.GetHabitsImportance(filteredHabitLogs);
+
+        var insights = importanceMap
+            .Select(kvp => new InsightDto(habits.First(habit => habit.Id == kvp.Key), kvp.Value))
+            .OrderByDescending(insight => insight.Influence)
+            .ToList();
+        
+        return insights;
     }
 
-    private static IEnumerable<HabitLogDto> GetFilteredHabitLogs(List<JournalLogDto> journalLogs)
+    private static List<JournalLogDto> GetFilteredJournalLogs(List<JournalLogDto> journalLogs)
     {
-        return journalLogs
-            .SelectMany(journalLog => journalLog.HabitLogs)
-            .GroupBy(habitLog => habitLog.HabitId)
+        var filteredHabitLogs = journalLogs
+            .SelectMany(j => j.HabitLogs)
+            .GroupBy(h => h.HabitId)
             .Where(group =>
             {
-                var zeroCount = group.Count(habitLog => habitLog.Value == false);
-                var nonZeroCount = group.Count(habitLog => habitLog.Value);
+                var zeroCount = group.Count(h => h.Value == false);
+                var nonZeroCount = group.Count(h => h.Value);
                 return zeroCount >= 5 && nonZeroCount >= 5;
             })
-            .SelectMany(group => group);
+            .SelectMany(g => g)
+            .ToList();
+
+        var allowedHabitIds = filteredHabitLogs
+            .Select(h => h.HabitId)
+            .Distinct()
+            .ToHashSet();
+
+        var filteredJournalLogs = journalLogs.Select(journalLog => journalLog with
+            {
+                HabitLogs = journalLog.HabitLogs.Where(h => allowedHabitIds.Contains(h.HabitId))
+            })
+            .Where(j => j.HabitLogs.Any())
+            .ToList();
+
+        return filteredJournalLogs;
     }
 
 

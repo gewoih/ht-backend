@@ -1,3 +1,3 @@
 namespace HT.Common.Dto;
 
-public record JournalLogDto(int Score, IEnumerable<HabitLogDto> HabitLogs);
+public record JournalLogDto(DateTime Date, int Score, IEnumerable<HabitLogDto> HabitLogs);

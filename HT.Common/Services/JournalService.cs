@@ -11,16 +11,19 @@ public sealed class JournalService(HtContext context)
     {
         return await context.JournalLogs
             .Where(journalLog => journalLog.Date == date.Date.ToUniversalTime())
-            .Select(journalLog => new JournalLogDto(journalLog.Score,
-                journalLog.HabitLogs.Select(habitLog => new HabitLogDto(habitLog.HabitId, habitLog.Value != 0f))))
+            .Select(journalLog => new JournalLogDto(journalLog.Date, journalLog.Score,
+                journalLog.HabitLogs.Select(habitLog =>
+                    new HabitLogDto(habitLog.HabitId, habitLog.Value != 0f))))
             .FirstOrDefaultAsync();
     }
-    
-    public async Task<List<JournalLogDto>> GetAllAsync()
+
+    public async Task<List<JournalLogDto>> GetLogsAsync()
     {
         return await context.JournalLogs
-            .Select(journalLog => new JournalLogDto(journalLog.Score,
-                journalLog.HabitLogs.Select(habitLog => new HabitLogDto(habitLog.HabitId, habitLog.Value != 0f))))
+            .Where(journalLog => journalLog.Score != 0)
+            .Select(journalLog => new JournalLogDto(journalLog.Date, journalLog.Score,
+                journalLog.HabitLogs.Select(habitLog =>
+                    new HabitLogDto(habitLog.HabitId, habitLog.Value != 0f))))
             .ToListAsync();
     }
 
@@ -62,5 +65,4 @@ public sealed class JournalService(HtContext context)
 
         await context.SaveChangesAsync();
     }
-
 }

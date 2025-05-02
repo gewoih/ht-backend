@@ -7,52 +7,51 @@ namespace HT.Common.Services;
 
 public class NeuralEngine
 {
-    public void GetHabitsImportance(List<JournalLogDto> journalLogs)
+    public Dictionary<Guid, double> GetHabitsImportance(List<JournalLogDto> journalLogs)
     {
-        var habits = journalLogs.SelectMany(journalLog => journalLog.HabitLogs).Distinct().ToList();
+        var habitIds = journalLogs
+            .SelectMany(journalLog => journalLog.HabitLogs)
+            .Select(habitLog => habitLog.HabitId)
+            .OrderBy(habitLog => habitLog.ToString())
+            .Distinct()
+            .ToList();
+        
+        var avgScore = journalLogs.Average(j => j.Score);
 
         var mlContext = new MLContext(seed: 228);
         var data = journalLogs.Select(journalLog =>
         {
-            var vector = new float[habits.Count];
+            var vector = new float[habitIds.Count];
             foreach (var habitLog in journalLog.HabitLogs)
             {
-                var index = habits.FindIndex(h => h.Id == habitLog.HabitId);
+                var index = habitIds.FindIndex(h => h == habitLog.HabitId);
                 if (index >= 0)
-                    vector[index] = habitLog.Value ? 1.0f : 0.0f;
+                    vector[index] = habitLog.Value ? 1.0f : -1.0f;
             }
 
             return new HabitData
             {
                 Features = vector,
-                Label = journalLog.Score
+                Label = journalLog.Score - (float)avgScore
             };
         }).ToList();
 
         var schemaDefinition = SchemaDefinition.Create(typeof(HabitData));
-        schemaDefinition["Features"].ColumnType = new VectorDataViewType(NumberDataViewType.Single, habits.Count);
+        schemaDefinition["Features"].ColumnType = new VectorDataViewType(NumberDataViewType.Single, habitIds.Count);
         var dataView = mlContext.Data.LoadFromEnumerable(data, schemaDefinition);
         
-        var pipeline = mlContext.Regression.Trainers.Sdca();
+        var pipeline = mlContext.Regression.Trainers.Sdca(maximumNumberOfIterations: 1000);
         var model = pipeline.Fit(dataView);
-
-        var transformedData = model.Transform(dataView);
-        var permutationMetrics = mlContext.Regression.PermutationFeatureImportance(
-            model, transformedData, labelColumnName: "Label");
 
         var linearModel = model.Model;
         var weights = linearModel.Weights.ToArray();
-        var result = new Dictionary<string, (double importance, float weight)>();
-        for (var i = 0; i < habitNames.Length; i++)
+        var result = new Dictionary<Guid, double>();
+        for (var index = 0; index < habitIds.Count; index++)
         {
-            result[habitNames[i]] = (
-                importance: Math.Abs(permutationMetrics[i].RSquared.Mean) * 100,
-                weight: weights[i]
-            );
+            var habitId = habitIds[index];
+            result[habitId] = weights[index];
         }
 
-        var sorted = result
-            .OrderByDescending(kv => kv.Value.importance * kv.Value.weight)
-            .ToList();
+        return result;
     }
 }

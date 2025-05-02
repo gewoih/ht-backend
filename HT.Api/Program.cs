@@ -28,6 +28,7 @@ builder.Services.AddDbContext<HtContext>(options => options.UseNpgsql(connection
 builder.Services.AddScoped<HabitService>();
 builder.Services.AddScoped<JournalService>();
 builder.Services.AddScoped<NeuralEngine>();
+builder.Services.AddScoped<InsightService>();
 
 var app = builder.Build();
 
@@ -83,9 +84,6 @@ if (!await context.Users.AnyAsync())
 }
 
 await context.SaveChangesAsync();
-
-var neuralEngine = scope.ServiceProvider.GetRequiredService<NeuralEngine>();
-await neuralEngine.GetHabitsImportance();
 
 app.UseCors("VueFrontend");
 
