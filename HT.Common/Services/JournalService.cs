@@ -21,7 +21,6 @@ public sealed class JournalService(HtContext context)
     public async Task<List<JournalLogDto>> GetLogsAsync()
     {
         return await context.JournalLogs
-            .Where(journalLog => journalLog.Score != 0)
             .Select(journalLog =>
                 new JournalLogDto(journalLog.Date, journalLog.HealthScore, journalLog.EnergyScore, journalLog.MoodScore,
                     journalLog.HabitLogs.Select(habitLog => new HabitLogDto(habitLog.HabitId, habitLog.Value != 0f))))

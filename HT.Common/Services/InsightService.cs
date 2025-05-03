@@ -17,6 +17,7 @@ public class InsightService(
 
         var insights = importanceMap
             .Select(kvp => new InsightDto(habits.First(habit => habit.Id == kvp.Key), kvp.Value))
+            .Where(insight => Math.Abs(insight.Influence) > 2)
             .OrderByDescending(insight => insight.Influence)
             .ToList();
 
