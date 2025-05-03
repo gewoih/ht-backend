@@ -9,8 +9,15 @@ public sealed class HabitService(HtContext context)
     public async Task<List<HabitDto>> GetAllAsync()
     {
         return await context.Habits
-            .OrderBy(habit => habit.Name)
             .Select(habit => new HabitDto(habit.Id, habit.Category, habit.Name))
             .ToListAsync();
+    }
+
+    public async Task<HabitDetailsDto?> GetDetailsAsync(Guid habitId)
+    {
+        return await context.Habits
+            .Where(habit => habit.Id == habitId)
+            .Select(habit => new HabitDetailsDto(habit.Description, habit.Recommendation))
+            .FirstOrDefaultAsync();
     }
 }

@@ -12,5 +12,15 @@ namespace HT.Api.Controllers
         {
             return Ok(await habitService.GetAllAsync());
         }
+
+        [HttpGet("{id:guid}/details")]
+        public async Task<IActionResult> GetDetails([FromRoute] Guid id)
+        {
+            var habitDetails = await habitService.GetDetailsAsync(id);
+            if (habitDetails == null)
+                return NotFound();
+            
+            return Ok(habitDetails);
+        }
     }
 }

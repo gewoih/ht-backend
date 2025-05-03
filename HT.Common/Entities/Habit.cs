@@ -8,7 +8,12 @@ public sealed class Habit : NamedEntity
 {
     [Required]
     public string Category { get; set; }
-    public string? Description { get; set; }
-    public string? Recommendation { get; set; }
+    
+    [Required]
+    public string Description { get; set; }
+    
+    [Required]
+    public string Recommendation { get; set; }
+    
     public HabitPolarity Polarity { get; set; }
 }
