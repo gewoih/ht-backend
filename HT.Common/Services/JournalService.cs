@@ -7,13 +7,14 @@ namespace HT.Common.Services;
 
 public sealed class JournalService(HtContext context)
 {
+    //TODO: Mappers
     public async Task<JournalLogDto?> GetAsync(DateTime date)
     {
         return await context.JournalLogs
             .Where(journalLog => journalLog.Date == date.Date.ToUniversalTime())
-            .Select(journalLog => new JournalLogDto(journalLog.Date, journalLog.Score,
-                journalLog.HabitLogs.Select(habitLog =>
-                    new HabitLogDto(habitLog.HabitId, habitLog.Value != 0f))))
+            .Select(journalLog =>
+                new JournalLogDto(journalLog.Date, journalLog.HealthScore, journalLog.EnergyScore, journalLog.MoodScore,
+                    journalLog.HabitLogs.Select(habitLog => new HabitLogDto(habitLog.HabitId, habitLog.Value != 0f))))
             .FirstOrDefaultAsync();
     }
 
@@ -21,9 +22,9 @@ public sealed class JournalService(HtContext context)
     {
         return await context.JournalLogs
             .Where(journalLog => journalLog.Score != 0)
-            .Select(journalLog => new JournalLogDto(journalLog.Date, journalLog.Score,
-                journalLog.HabitLogs.Select(habitLog =>
-                    new HabitLogDto(habitLog.HabitId, habitLog.Value != 0f))))
+            .Select(journalLog =>
+                new JournalLogDto(journalLog.Date, journalLog.HealthScore, journalLog.EnergyScore, journalLog.MoodScore,
+                    journalLog.HabitLogs.Select(habitLog => new HabitLogDto(habitLog.HabitId, habitLog.Value != 0f))))
             .ToListAsync();
     }
 
@@ -37,7 +38,9 @@ public sealed class JournalService(HtContext context)
 
         if (existingLog != null)
         {
-            existingLog.Score = request.Score;
+            existingLog.HealthScore = request.HealthScore;
+            existingLog.EnergyScore = request.EnergyScore;
+            existingLog.MoodScore = request.MoodScore;
 
             context.HabitLogs.RemoveRange(existingLog.HabitLogs);
             existingLog.HabitLogs = request.HabitLogs.Select(habitLog => new HabitLog
@@ -52,7 +55,9 @@ public sealed class JournalService(HtContext context)
             {
                 UserId = request.UserId,
                 Date = journalLogDateUtc,
-                Score = request.Score,
+                HealthScore = request.HealthScore,
+                EnergyScore = request.EnergyScore,
+                MoodScore = request.MoodScore,
                 HabitLogs = request.HabitLogs.Select(habitLog => new HabitLog
                 {
                     HabitId = habitLog.HabitId,

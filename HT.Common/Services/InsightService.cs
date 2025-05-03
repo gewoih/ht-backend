@@ -19,7 +19,7 @@ public class InsightService(
             .Select(kvp => new InsightDto(habits.First(habit => habit.Id == kvp.Key), kvp.Value))
             .OrderByDescending(insight => insight.Influence)
             .ToList();
-        
+
         return insights;
     }
 
@@ -42,10 +42,9 @@ public class InsightService(
             .Distinct()
             .ToHashSet();
 
-        var filteredJournalLogs = journalLogs.Select(journalLog => journalLog with
-            {
-                HabitLogs = journalLog.HabitLogs.Where(h => allowedHabitIds.Contains(h.HabitId))
-            })
+        var filteredJournalLogs = journalLogs.Select(journalLog =>
+                new JournalLogDto(journalLog.Date, journalLog.HealthScore, journalLog.EnergyScore, journalLog.MoodScore,
+                    journalLog.HabitLogs.Where(h => allowedHabitIds.Contains(h.HabitId))))
             .Where(j => j.HabitLogs.Any())
             .ToList();
 

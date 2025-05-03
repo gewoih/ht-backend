@@ -29,7 +29,7 @@ public class NeuralEngine
 
     private static Dictionary<Guid, double> ExtractWeights(
         RegressionPredictionTransformer<LinearRegressionModelParameters> model,
-        IList<Guid> habitIds)
+        List<Guid> habitIds)
     {
         var coeffs = model.Model.Weights.ToArray();
         var dict = new Dictionary<Guid, double>(habitIds.Count);
