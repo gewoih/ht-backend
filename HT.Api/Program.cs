@@ -30,6 +30,8 @@ builder.Services.AddScoped<HabitService>();
 builder.Services.AddScoped<JournalService>();
 builder.Services.AddScoped<NeuralEngine>();
 builder.Services.AddScoped<InsightService>();
+builder.Services.AddScoped<CurrentUserService>();
+builder.Services.AddScoped<UserHabitService>();
 
 var app = builder.Build();
 

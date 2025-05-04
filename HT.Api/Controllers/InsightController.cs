@@ -1,16 +1,15 @@
 using HT.Common.Services;
 using Microsoft.AspNetCore.Mvc;
 
-namespace HT.Api.Controllers
+namespace HT.Api.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class InsightController(InsightService insightService) : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class InsightController(InsightService insightService) : ControllerBase
+    public async Task<IActionResult> Get()
     {
-        public async Task<IActionResult> Get()
-        {
-            var insights = await insightService.GetInsightsAsync();
-            return Ok(insights);
-        }
+        var insights = await insightService.GetInsightsAsync();
+        return Ok(insights);
     }
 }

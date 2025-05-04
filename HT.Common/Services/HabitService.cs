@@ -6,7 +6,7 @@ namespace HT.Common.Services;
 
 public sealed class HabitService(HtContext context)
 {
-    public async Task<List<HabitDto>> GetAllAsync()
+    public async Task<List<HabitDto>> GetAsync()
     {
         return await context.Habits
             .Select(habit => new HabitDto(habit.Id, habit.Category, habit.Name))

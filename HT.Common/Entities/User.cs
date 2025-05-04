@@ -4,5 +4,5 @@ namespace HT.Common.Entities;
 
 public sealed class User : NamedEntity
 {
-    public ICollection<JournalLog>? DayScores { get; set; }
+    public ICollection<Habit>? Habits { get; set; }
 }

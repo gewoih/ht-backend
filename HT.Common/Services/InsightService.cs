@@ -9,7 +9,7 @@ public class InsightService(
 {
     public async Task<List<InsightDto>> GetInsightsAsync()
     {
-        var habits = await habitService.GetAllAsync();
+        var habits = await habitService.GetAsync();
 
         var journalLogs = await journalService.GetLogsAsync();
         var filteredHabitLogs = GetFilteredJournalLogs(journalLogs);
