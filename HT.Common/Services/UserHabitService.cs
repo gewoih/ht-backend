@@ -16,7 +16,7 @@ public class UserHabitService(HtContext context, CurrentUserService currentUserS
             .ToListAsync();
     }
 
-    public async Task UpdateAsync(List<Guid> habitIds)
+    public async Task ReplaceAsync(List<Guid> habitIds)
     {
         var currentUserId = currentUserService.GetCurrentUserId();
         var userExists = await context.Users.AnyAsync(u => u.Id == currentUserId);

@@ -4,14 +4,14 @@ namespace HT.Common.Services;
 
 public class InsightService(
     HabitService habitService,
-    JournalService journalService,
+    UserJournalService userJournalService,
     NeuralEngine neuralEngine)
 {
     public async Task<List<InsightDto>> GetInsightsAsync()
     {
         var habits = await habitService.GetAsync();
 
-        var journalLogs = await journalService.GetLogsAsync();
+        var journalLogs = await userJournalService.GetLogsAsync();
         var filteredHabitLogs = GetFilteredJournalLogs(journalLogs);
         var importanceMap = neuralEngine.GetHabitsImportance(filteredHabitLogs);
 
@@ -39,13 +39,13 @@ public class InsightService(
             .ToList();
 
         var allowedHabitIds = filteredHabitLogs
-            .Select(h => h.HabitId)
+            .Select(habitLog => habitLog.HabitId)
             .Distinct()
             .ToHashSet();
 
         var filteredJournalLogs = journalLogs.Select(journalLog =>
                 new JournalLogDto(journalLog.Date, journalLog.HealthScore, journalLog.EnergyScore, journalLog.MoodScore,
-                    journalLog.HabitLogs.Where(h => allowedHabitIds.Contains(h.HabitId))))
+                    journalLog.HabitLogs.Where(habitLog => allowedHabitIds.Contains(habitLog.HabitId))))
             .Where(j => j.HabitLogs.Any())
             .ToList();
 

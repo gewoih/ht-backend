@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HT.Common.Services;
 
-public sealed class JournalService(HtContext context)
+public sealed class UserJournalService(HtContext context)
 {
     //TODO: Mappers
     public async Task<JournalLogDto?> GetAsync(DateTime date)

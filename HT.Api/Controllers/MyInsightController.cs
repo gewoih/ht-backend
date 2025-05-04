@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HT.Api.Controllers;
 
-[Route("api/[controller]")]
+[Route("api/me/insight")]
 [ApiController]
-public class InsightController(InsightService insightService) : ControllerBase
+public class MyInsightController(InsightService insightService) : ControllerBase
 {
     public async Task<IActionResult> Get()
     {

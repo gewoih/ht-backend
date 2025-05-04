@@ -27,7 +27,7 @@ builder.Services.AddDbContext<HtContext>(options => options.UseNpgsql(connection
 
 builder.Services.AddScoped<DatabaseInitializer>();
 builder.Services.AddScoped<HabitService>();
-builder.Services.AddScoped<JournalService>();
+builder.Services.AddScoped<UserJournalService>();
 builder.Services.AddScoped<NeuralEngine>();
 builder.Services.AddScoped<InsightService>();
 builder.Services.AddScoped<CurrentUserService>();
