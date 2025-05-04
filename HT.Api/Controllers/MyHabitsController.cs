@@ -17,6 +17,6 @@ public class MyHabitsController(UserHabitService userHabitService) : ControllerB
     [HttpGet]
     public async Task<IActionResult> Get()
     {
-        return Ok(await userHabitService.GetAsync());
+        return Ok(await userHabitService.GetIdsAsync());
     }
 }

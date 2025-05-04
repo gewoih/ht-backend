@@ -7,6 +7,15 @@ namespace HT.Common.Services;
 
 public class UserHabitService(HtContext context, CurrentUserService currentUserService)
 {
+    public async Task<List<Guid>> GetIdsAsync()
+    {
+        var currentUserId = currentUserService.GetCurrentUserId();
+        return await context.UserHabits
+            .Where(habit => habit.UserId == currentUserId)
+            .Select(userHabit => userHabit.HabitId)
+            .ToListAsync();
+    }
+    
     public async Task<List<HabitDto>> GetAsync()
     {
         var currentUserId = currentUserService.GetCurrentUserId();
