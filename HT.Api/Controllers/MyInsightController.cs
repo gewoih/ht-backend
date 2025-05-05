@@ -1,15 +1,15 @@
-using HT.Common.Services;
+using HT.Application.Insights.Queries;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HT.Api.Controllers;
 
 [Route("api/me/insight")]
 [ApiController]
-public class MyInsightController(InsightService insightService) : ControllerBase
+public class MyInsightController(IMediator mediator) : ControllerBase
 {
-    public async Task<IActionResult> Get()
+    public async Task<IActionResult> Get(CancellationToken cancellationToken)
     {
-        var insights = await insightService.GetInsightsAsync();
-        return Ok(insights);
+        return Ok(await mediator.Send(new GetInsightsQuery(), cancellationToken));
     }
 }

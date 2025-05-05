@@ -7,6 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="MediatR" Version="12.5.0" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.2"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.4">
           <PrivateAssets>all</PrivateAssets>
@@ -20,7 +21,9 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\HT.Common\HT.Common.csproj" />
+      <ProjectReference Include="..\HT.Application\HT.Application.csproj" />
+      <ProjectReference Include="..\HT.Domain\HT.Domain.csproj" />
+      <ProjectReference Include="..\HT.Infrastructure\HT.Infrastructure.csproj" />
     </ItemGroup>
 
 </Project>

@@ -1,25 +1,23 @@
-using HT.Common.Services;
+using HT.Application.Habits.Queries.GetAllHabits;
+using HT.Application.Habits.Queries.GetHabitDetails;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HT.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class HabitsController(HabitService habitService) : ControllerBase
+public class HabitsController(IMediator mediator) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> GetAllHabits()
+    public async Task<IActionResult> GetAllHabits(CancellationToken cancellationToken)
     {
-        return Ok(await habitService.GetAsync());
+        return Ok(await mediator.Send(new GetAllHabitsQuery(), cancellationToken));
     }
 
     [HttpGet("{id:guid}/details")]
-    public async Task<IActionResult> GetDetails([FromRoute] Guid id)
+    public async Task<IActionResult> GetDetails([FromRoute] Guid id, CancellationToken cancellationToken)
     {
-        var habitDetails = await habitService.GetDetailsAsync(id);
-        if (habitDetails == null)
-            return NotFound();
-            
-        return Ok(habitDetails);
+        return Ok(await mediator.Send(new GetHabitDetailsQuery(id), cancellationToken));
     }
 }
