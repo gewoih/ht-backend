@@ -7,8 +7,6 @@ namespace HT.Api.Controllers;
 [ApiController]
 public class MyInsightController(IInsightService insightService) : ControllerBase
 {
-    public async Task<IActionResult> Get(CancellationToken cancellationToken)
-    {
-        return Ok(await insightService.GetInsightsAsync(cancellationToken));
-    }
+    public async Task<IActionResult> Get(CancellationToken cancellationToken) =>
+        Ok(await insightService.GetInsightsAsync(cancellationToken));
 }

@@ -1,9 +1,7 @@
 using HT.Application.Dto;
 using HT.Application.Interfaces;
-using HT.Infrastructure.Persistence.Journals;
-using HT.Infrastructure.Persistence.ML;
 
-namespace HT.Infrastructure.Persistence.Insights;
+namespace HT.Infrastructure.Persistence;
 
 public class InsightService(
     IHabitService habitService,

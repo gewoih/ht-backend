@@ -2,7 +2,7 @@ using HT.Application.Dto;
 using HT.Application.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace HT.Infrastructure.Persistence.Habits;
+namespace HT.Infrastructure.Persistence;
 
 public sealed class HabitService(HtContext context) : IHabitService
 {
