@@ -1,4 +1,4 @@
-namespace HT.Application.ML.Dto;
+namespace HT.Application.Dto;
 
 public class HabitData
 {

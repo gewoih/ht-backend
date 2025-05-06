@@ -1,5 +1,4 @@
-using HT.Application.Journal.Dto;
-using HT.Application.ML.Dto;
+using HT.Application.Dto;
 using Microsoft.ML;
 using Microsoft.ML.Data;
 using Microsoft.ML.Trainers;

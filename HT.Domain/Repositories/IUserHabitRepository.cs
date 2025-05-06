@@ -1,4 +1,4 @@
-namespace HT.Domain.UserHabits;
+namespace HT.Domain.Repositories;
 
 public interface IUserHabitRepository
 {

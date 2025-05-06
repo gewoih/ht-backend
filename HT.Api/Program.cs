@@ -1,11 +1,6 @@
 using System.Text.Json;
-using HT.Application.Common.Interfaces;
-using HT.Application.Habits.Interfaces;
-using HT.Application.Insights.Interfaces;
-using HT.Application.Journal.Interfaces;
+using HT.Application.Interfaces;
 using HT.Domain.Repositories;
-using HT.Domain.UserHabits;
-using HT.Domain.Users;
 using HT.Infrastructure.Auth;
 using HT.Infrastructure.Persistence;
 using HT.Infrastructure.Persistence.Habits;

@@ -1,4 +1,4 @@
-using HT.Application.Common.Interfaces;
+using HT.Application.Interfaces;
 
 namespace HT.Infrastructure.Auth;
 

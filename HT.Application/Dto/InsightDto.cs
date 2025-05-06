@@ -1,5 +1,3 @@
-using HT.Application.Habits.Dto;
-
-namespace HT.Application.Insights.Dto;
+namespace HT.Application.Dto;
 
 public record InsightDto(HabitDto Habit, double Influence);

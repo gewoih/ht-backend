@@ -1,4 +1,4 @@
-using HT.Application.Insights.Interfaces;
+using HT.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HT.Api.Controllers;

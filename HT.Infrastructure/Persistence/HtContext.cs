@@ -1,7 +1,4 @@
 using HT.Domain.Entities;
-using HT.Domain.Habits;
-using HT.Domain.UserHabits;
-using HT.Domain.Users;
 using Microsoft.EntityFrameworkCore;
 
 namespace HT.Infrastructure.Persistence;

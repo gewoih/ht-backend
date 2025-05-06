@@ -1,8 +1,6 @@
 using HT.Domain.Entities.Base;
-using HT.Domain.Habits;
-using HT.Domain.Users;
 
-namespace HT.Domain.UserHabits;
+namespace HT.Domain.Entities;
 
 public class UserHabit : Entity
 {

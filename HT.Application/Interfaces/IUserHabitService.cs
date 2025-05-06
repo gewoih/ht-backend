@@ -1,6 +1,6 @@
-using HT.Application.Habits.Dto;
+using HT.Application.Dto;
 
-namespace HT.Application.Habits.Interfaces;
+namespace HT.Application.Interfaces;
 
 public interface IUserHabitService
 {

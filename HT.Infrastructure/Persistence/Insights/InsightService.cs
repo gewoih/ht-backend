@@ -1,8 +1,5 @@
-using HT.Application.Habits.Interfaces;
-using HT.Application.Insights.Dto;
-using HT.Application.Insights.Interfaces;
-using HT.Application.Journal.Dto;
-using HT.Application.Journal.Interfaces;
+using HT.Application.Dto;
+using HT.Application.Interfaces;
 using HT.Infrastructure.Persistence.Journals;
 using HT.Infrastructure.Persistence.ML;
 

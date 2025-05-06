@@ -1,6 +1,6 @@
-using HT.Application.Journal.Dto;
+using HT.Application.Dto;
 
-namespace HT.Application.Journal.Interfaces;
+namespace HT.Application.Interfaces;
 
 public interface IUserJournalService
 {

@@ -1,6 +1,5 @@
-using HT.Application.Common.Interfaces;
-using HT.Application.Habits.Dto;
-using HT.Application.Habits.Interfaces;
+using HT.Application.Dto;
+using HT.Application.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace HT.Infrastructure.Persistence.UserHabits;

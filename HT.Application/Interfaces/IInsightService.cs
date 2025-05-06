@@ -1,6 +1,6 @@
-using HT.Application.Insights.Dto;
+using HT.Application.Dto;
 
-namespace HT.Application.Insights.Interfaces;
+namespace HT.Application.Interfaces;
 
 public interface IInsightService
 {

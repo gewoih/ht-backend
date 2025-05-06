@@ -1,4 +1,5 @@
-using HT.Domain.UserHabits;
+using HT.Domain.Entities;
+using HT.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace HT.Infrastructure.Persistence.UserHabits;

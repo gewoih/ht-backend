@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using HT.Domain.Entities.Base;
-using HT.Domain.Habits;
 
 namespace HT.Domain.Entities;
 

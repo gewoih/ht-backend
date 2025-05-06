@@ -1,5 +1,5 @@
 using HT.Domain.Entities;
-using HT.Domain.Users;
+using HT.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace HT.Infrastructure.Persistence.Users;

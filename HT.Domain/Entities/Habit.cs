@@ -1,8 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using HT.Domain.Entities.Base;
-using HT.Domain.Users;
 
-namespace HT.Domain.Habits;
+namespace HT.Domain.Entities;
 
 public sealed class Habit : NamedEntity
 {

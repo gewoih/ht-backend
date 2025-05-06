@@ -1,7 +1,5 @@
-using HT.Application.Common.Interfaces;
-using HT.Application.Habits.Interfaces;
-using HT.Domain.UserHabits;
-using HT.Domain.Users;
+using HT.Application.Interfaces;
+using HT.Domain.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HT.Api.Controllers;

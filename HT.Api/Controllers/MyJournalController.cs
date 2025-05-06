@@ -1,6 +1,5 @@
-using HT.Application.Common.Interfaces;
-using HT.Application.Journal.Dto;
-using HT.Application.Journal.Interfaces;
+using HT.Application.Dto;
+using HT.Application.Interfaces;
 using HT.Domain.Entities;
 using HT.Domain.Repositories;
 using Microsoft.AspNetCore.Mvc;

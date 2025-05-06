@@ -1,4 +1,4 @@
-namespace HT.Application.Common.Interfaces;
+namespace HT.Application.Interfaces;
 
 public interface ICurrentUserService
 {

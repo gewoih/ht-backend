@@ -1,4 +1,4 @@
-namespace HT.Domain.Users;
+namespace HT.Domain.Repositories;
 
 public interface IUserRepository
 {

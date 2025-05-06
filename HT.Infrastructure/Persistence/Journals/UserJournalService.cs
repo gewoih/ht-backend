@@ -1,6 +1,5 @@
-using HT.Application.Habits.Dto;
-using HT.Application.Journal.Dto;
-using HT.Application.Journal.Interfaces;
+using HT.Application.Dto;
+using HT.Application.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace HT.Infrastructure.Persistence.Journals;
