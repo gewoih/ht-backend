@@ -7,12 +7,6 @@ namespace HT.Api.Controllers;
 [ApiController]
 public class HabitsController(IHabitService habitService) : ControllerBase
 {
-    [HttpGet]
-    public async Task<IActionResult> GetAllHabits(CancellationToken cancellationToken)
-    {
-        return Ok(await habitService.GetAsync(cancellationToken));
-    }
-
     [HttpGet("{id:guid}/details")]
     public async Task<IActionResult> GetDetails([FromRoute] Guid id, CancellationToken cancellationToken)
     {

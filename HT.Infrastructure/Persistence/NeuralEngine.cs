@@ -3,7 +3,7 @@ using Microsoft.ML;
 using Microsoft.ML.Data;
 using Microsoft.ML.Trainers;
 
-namespace HT.Infrastructure.Persistence.ML;
+namespace HT.Infrastructure.Persistence;
 
 public class NeuralEngine
 {

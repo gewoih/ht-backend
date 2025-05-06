@@ -1,22 +1,11 @@
-using System.Text.Json;
 using HT.Application.Interfaces;
-using HT.Domain.Repositories;
 using HT.Infrastructure.Auth;
 using HT.Infrastructure.Persistence;
-using HT.Infrastructure.Persistence.Habits;
-using HT.Infrastructure.Persistence.Insights;
-using HT.Infrastructure.Persistence.Journals;
-using HT.Infrastructure.Persistence.ML;
-using HT.Infrastructure.Persistence.UserHabits;
-using HT.Infrastructure.Persistence.Users;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
-builder.Services.AddControllers().AddJsonOptions(options =>
-{
-    options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-});
+builder.Services.AddControllers();
 
 builder.Services.AddCors(options =>
 {
@@ -36,13 +25,10 @@ builder.Services.AddScoped<DatabaseInitializer>();
 builder.Services.AddScoped<NeuralEngine>();
 
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IHabitService, HabitService>();
 builder.Services.AddScoped<IUserHabitService, UserHabitService>();
-builder.Services.AddScoped<IUserHabitRepository, UserHabitRepository>();
 builder.Services.AddScoped<IInsightService, InsightService>();
 builder.Services.AddScoped<IUserJournalService, UserJournalService>();
-builder.Services.AddScoped<IUserJournalRepository, UserJournalRepository>();
 
 var app = builder.Build();
 
