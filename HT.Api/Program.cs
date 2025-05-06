@@ -1,8 +1,6 @@
 using System.Text.Json;
-using HT.Api.Filters;
 using HT.Application.Common.Interfaces;
 using HT.Application.Habits.Interfaces;
-using HT.Application.Habits.Queries.GetAllHabits;
 using HT.Application.Insights.Interfaces;
 using HT.Application.Journal.Interfaces;
 using HT.Domain.Repositories;
@@ -20,7 +18,7 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
-builder.Services.AddControllers(options => options.Filters.Add<ExceptionFilter>()).AddJsonOptions(options =>
+builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
 });
@@ -35,8 +33,6 @@ builder.Services.AddCors(options =>
             .AllowCredentials();
     });
 });
-
-builder.Services.AddMediatR(cfg => { cfg.RegisterServicesFromAssembly(typeof(GetAllHabitsHandler).Assembly); });
 
 var connectionString = builder.Configuration.GetConnectionString("Default");
 builder.Services.AddDbContext<HtContext>(options => options.UseNpgsql(connectionString));
