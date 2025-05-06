@@ -16,5 +16,5 @@ public class MyHabitsController(IUserHabitService userHabitService) : Controller
 
     [HttpGet]
     public async Task<IActionResult> Get(CancellationToken cancellationToken) =>
-        Ok(await userHabitService.GetAsync(cancellationToken));
+        Ok(await userHabitService.GetIdsAsync(cancellationToken));
 }

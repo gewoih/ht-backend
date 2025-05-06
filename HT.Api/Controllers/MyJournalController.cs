@@ -8,8 +8,11 @@ namespace HT.Api.Controllers;
 [ApiController]
 public class MyJournalController(IUserJournalService userJournalService) : ControllerBase
 {
-    public async Task<IActionResult> Get([FromQuery] DateTime date, CancellationToken cancellationToken) =>
-        Ok(await userJournalService.GetAsync(date, cancellationToken));
+    public async Task<IActionResult> Get([FromQuery] DateTime date, CancellationToken cancellationToken)
+    {
+        var journalLog = await userJournalService.GetAsync(date, cancellationToken);
+        return journalLog != null ? Ok(journalLog) : NotFound();
+    }
 
     [HttpPut]
     public async Task<IActionResult> Put([FromBody] CreateJournalLogRequest request,
