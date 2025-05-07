@@ -15,7 +15,7 @@ public class JwtService(IConfiguration configuration)
         {
             new Claim(ClaimTypes.Name, user.Name),
             new Claim(ClaimTypes.Email, user.Email),
-            new Claim(JwtRegisteredClaimNames.Jti, user.Id.ToString()),
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new Claim("subscription", user.CurrentSubscription.Type.ToString()),
         };
 

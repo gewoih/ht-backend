@@ -1,6 +1,8 @@
 using HT.Application.Interfaces;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HT.Api.Controllers;
@@ -20,7 +22,11 @@ public class AuthController(IAuthService authService) : ControllerBase
     [HttpGet("google-callback")]
     public async Task<IActionResult> GoogleCallback(string redirectUrl, CancellationToken cancellationToken)
     {
-        var token = await authService.SignInAsync(User, cancellationToken);
+        var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        if (!result.Succeeded || result.Principal == null)
+            return Unauthorized();
+        
+        var token = await authService.SignInAsync(result.Principal, cancellationToken);
         if (string.IsNullOrEmpty(token))
             return Unauthorized();
         

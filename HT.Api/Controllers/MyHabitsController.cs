@@ -1,10 +1,13 @@
 using HT.Application.Interfaces;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HT.Api.Controllers;
 
 [Route("api/me/habits")]
 [ApiController]
+[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 public class MyHabitsController(IUserHabitService userHabitService) : ControllerBase
 {
     [HttpPut]

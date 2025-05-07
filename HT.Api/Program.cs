@@ -27,9 +27,8 @@ var jwtSecretKey = builder.Configuration["Auth:Jwt:SecretKey"];
 builder.Services.AddAuthentication(options =>
     {
         options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
     })
-    .AddCookie() 
     .AddJwtBearer(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
@@ -40,14 +39,33 @@ builder.Services.AddAuthentication(options =>
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey!)),
             ValidIssuer = "https://localhost:5001",
-            ValidAudience = "http://localhost:8080"
+            ValidAudience = "https://localhost:8081"
         };
+        
+        options.Events = new JwtBearerEvents
+        {
+            OnAuthenticationFailed = ctx =>
+            {
+                Console.WriteLine("JWT failed: " + ctx.Exception.Message);
+                return Task.CompletedTask;
+            },
+            OnTokenValidated = ctx =>
+            {
+                Console.WriteLine("JWT succeeded for: " + ctx.Principal.Identity?.Name);
+                return Task.CompletedTask;
+            }
+        };
+
     })
+    .AddCookie()
     .AddGoogle(options =>
     {
         options.ClientId = builder.Configuration["Auth:Google:ClientId"]!;
         options.ClientSecret = builder.Configuration["Auth:Google:ClientSecret"]!;
     });
+builder.Services.AddAuthorization();
+
+builder.Services.AddHttpContextAccessor();
 
 var connectionString = builder.Configuration.GetConnectionString("Default");
 builder.Services.AddDbContext<HtContext>(options => options.UseNpgsql(connectionString));
@@ -57,7 +75,7 @@ builder.Services.AddScoped<NeuralEngine>();
 builder.Services.AddScoped<JwtService>();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<ICurrentUserService, MockCurrentUserService>();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<IHabitService, HabitService>();
 builder.Services.AddScoped<IUserHabitService, UserHabitService>();
 builder.Services.AddScoped<IInsightService, InsightService>();
