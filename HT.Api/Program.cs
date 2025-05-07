@@ -1,6 +1,4 @@
-using System.Security.Claims;
 using System.Text;
-using System.Text.Json;
 using HT.Application.Interfaces;
 using HT.Infrastructure.Auth;
 using HT.Infrastructure.Persistence;
@@ -28,10 +26,10 @@ builder.Services.AddCors(options =>
 var jwtSecretKey = builder.Configuration["Auth:Jwt:SecretKey"];
 builder.Services.AddAuthentication(options =>
     {
-        options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
         options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
     })
+    .AddCookie() 
     .AddJwtBearer(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
@@ -45,21 +43,10 @@ builder.Services.AddAuthentication(options =>
             ValidAudience = "http://localhost:8080"
         };
     })
-    .AddCookie() 
     .AddGoogle(options =>
     {
         options.ClientId = builder.Configuration["Auth:Google:ClientId"]!;
         options.ClientSecret = builder.Configuration["Auth:Google:ClientSecret"]!;
-        options.SaveTokens = true;
-        
-        options.Events.OnTicketReceived = async context =>
-        {
-            var email = context.Principal.FindFirstValue(ClaimTypes.Email);
-            var token = JwtService.GenerateJwtToken(builder.Configuration, email);
-
-            context.Response.Redirect($"https://localhost:8081/auth-success?token={token}");
-            context.HandleResponse();
-        };
     });
 
 var connectionString = builder.Configuration.GetConnectionString("Default");
@@ -67,8 +54,10 @@ builder.Services.AddDbContext<HtContext>(options => options.UseNpgsql(connection
 
 builder.Services.AddScoped<DatabaseInitializer>();
 builder.Services.AddScoped<NeuralEngine>();
+builder.Services.AddScoped<JwtService>();
 
-builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ICurrentUserService, MockCurrentUserService>();
 builder.Services.AddScoped<IHabitService, HabitService>();
 builder.Services.AddScoped<IUserHabitService, UserHabitService>();
 builder.Services.AddScoped<IInsightService, InsightService>();

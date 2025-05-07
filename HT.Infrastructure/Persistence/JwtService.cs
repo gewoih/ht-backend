@@ -1,19 +1,22 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using HT.Domain.Entities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
-namespace HT.Application.Interfaces;
+namespace HT.Infrastructure.Persistence;
 
-public static class JwtService
+public class JwtService(IConfiguration configuration)
 {
-    public static string GenerateJwtToken(IConfiguration configuration, string email)
+    public string GenerateJwtToken(User user)
     {
         var claims = new[]
         {
-            new Claim(ClaimTypes.Email, email),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            new Claim(ClaimTypes.Name, user.Name),
+            new Claim(ClaimTypes.Email, user.Email),
+            new Claim(JwtRegisteredClaimNames.Jti, user.Id.ToString()),
+            new Claim("subscription", user.CurrentSubscription.Type.ToString()),
         };
 
         var jwtSecretKey = configuration["Auth:JWT:SecretKey"];
@@ -24,7 +27,7 @@ public static class JwtService
             issuer: "https://localhost:5001",
             audience: "https://localhost:8081",
             claims: claims,
-            expires: DateTime.UtcNow.AddDays(7),
+            expires: DateTime.UtcNow.AddMinutes(30),
             signingCredentials: signingCredentials);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
