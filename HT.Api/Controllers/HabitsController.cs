@@ -1,10 +1,12 @@
 using HT.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HT.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class HabitsController(IHabitService habitService) : ControllerBase
 {
     [HttpGet]
