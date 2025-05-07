@@ -1,4 +1,4 @@
-namespace HT.Domain;
+namespace HT.Domain.Enums;
 
 public enum SubscriptionType
 {

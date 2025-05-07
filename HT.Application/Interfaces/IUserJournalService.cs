@@ -1,4 +1,5 @@
 using HT.Application.Dto;
+using HT.Application.Dto.Requests;
 
 namespace HT.Application.Interfaces;
 

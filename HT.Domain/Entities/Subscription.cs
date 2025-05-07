@@ -1,4 +1,6 @@
 using HT.Domain.Entities.Base;
+using HT.Domain.Entities.Identity;
+using HT.Domain.Enums;
 
 namespace HT.Domain.Entities;
 

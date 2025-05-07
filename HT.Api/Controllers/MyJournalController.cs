@@ -1,4 +1,5 @@
 using HT.Application.Dto;
+using HT.Application.Dto.Requests;
 using HT.Application.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;

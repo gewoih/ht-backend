@@ -1,4 +1,4 @@
-namespace HT.Application.Dto;
+namespace HT.Application.Dto.Requests;
 
 public record CreateJournalLogRequest(
     Guid UserId,

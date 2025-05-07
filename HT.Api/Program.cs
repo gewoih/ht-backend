@@ -1,10 +1,12 @@
 using System.Text;
 using HT.Application.Interfaces;
+using HT.Domain.Entities;
+using HT.Domain.Entities.Identity;
 using HT.Infrastructure.Auth;
 using HT.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
@@ -23,11 +25,15 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddIdentity<User, Role>()
+    .AddEntityFrameworkStores<HtContext>()
+    .AddDefaultTokenProviders();
+
 var jwtSecretKey = builder.Configuration["Auth:Jwt:SecretKey"];
 builder.Services.AddAuthentication(options =>
     {
-        options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
     })
     .AddJwtBearer(options =>
     {
@@ -41,28 +47,7 @@ builder.Services.AddAuthentication(options =>
             ValidIssuer = "https://localhost:5001",
             ValidAudience = "https://localhost:8081"
         };
-        
-        options.Events = new JwtBearerEvents
-        {
-            OnAuthenticationFailed = ctx =>
-            {
-                Console.WriteLine("JWT failed: " + ctx.Exception.Message);
-                return Task.CompletedTask;
-            },
-            OnTokenValidated = ctx =>
-            {
-                Console.WriteLine("JWT succeeded for: " + ctx.Principal.Identity?.Name);
-                return Task.CompletedTask;
-            }
-        };
-
-    })
-    .AddCookie()
-    .AddGoogle(options =>
-    {
-        options.ClientId = builder.Configuration["Auth:Google:ClientId"]!;
-        options.ClientSecret = builder.Configuration["Auth:Google:ClientSecret"]!;
-    });
+    }); 
 builder.Services.AddAuthorization();
 
 builder.Services.AddHttpContextAccessor();

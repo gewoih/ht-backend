@@ -1,4 +1,5 @@
 using HT.Application.Dto;
+using HT.Application.Dto.Requests;
 using HT.Application.Interfaces;
 using HT.Domain.Entities;
 using Microsoft.EntityFrameworkCore;

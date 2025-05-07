@@ -1,9 +1,10 @@
-using System.Security.Claims;
+using HT.Application.Dto;
+using HT.Application.Dto.Requests;
 
 namespace HT.Application.Interfaces;
 
 public interface IAuthService
 {
-    Task<string> SignInAsync(ClaimsPrincipal claimsPrincipal,
-        CancellationToken cancellationToken = default);
+    Task<bool> RegisterAsync(RegisterRequest request);
+    Task<string> SignInAsync(SignInRequest request);
 }

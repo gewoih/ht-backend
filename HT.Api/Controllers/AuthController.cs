@@ -1,8 +1,6 @@
+using HT.Application.Dto;
+using HT.Application.Dto.Requests;
 using HT.Application.Interfaces;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.Google;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HT.Api.Controllers;
@@ -11,25 +9,23 @@ namespace HT.Api.Controllers;
 [ApiController]
 public class AuthController(IAuthService authService) : ControllerBase
 {
-    [HttpGet("login")]
-    public IActionResult Login(string redirectUrl)
+    [HttpPost("register")]
+    public async Task<IActionResult> Register([FromBody] RegisterRequest request)
     {
-        var returnUrl = Url.Action(nameof(GoogleCallback), "Auth", new { RedirectUrl = redirectUrl });
-        var properties = new AuthenticationProperties { RedirectUri = returnUrl };
-        return Challenge(properties, GoogleDefaults.AuthenticationScheme);
+        var isRegistered = await authService.RegisterAsync(request);
+        if (!isRegistered)
+            return BadRequest();
+        
+        return Ok();
     }
     
-    [HttpGet("google-callback")]
-    public async Task<IActionResult> GoogleCallback(string redirectUrl, CancellationToken cancellationToken)
+    [HttpPost("login")]
+    public async Task<IActionResult> Login([FromBody] SignInRequest request)
     {
-        var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-        if (!result.Succeeded || result.Principal == null)
-            return Unauthorized();
-        
-        var token = await authService.SignInAsync(result.Principal, cancellationToken);
+        var token = await authService.SignInAsync(request);
         if (string.IsNullOrEmpty(token))
             return Unauthorized();
         
-        return Redirect($"{redirectUrl}?token={token}");
+        return Ok(token);
     }
 }

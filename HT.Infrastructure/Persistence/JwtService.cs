@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using HT.Domain.Entities;
+using HT.Domain.Entities.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
@@ -13,7 +14,7 @@ public class JwtService(IConfiguration configuration)
     {
         var claims = new[]
         {
-            new Claim(ClaimTypes.Name, user.Name),
+            new Claim(ClaimTypes.Name, user.UserName),
             new Claim(ClaimTypes.Email, user.Email),
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new Claim("subscription", user.CurrentSubscription.Type.ToString()),

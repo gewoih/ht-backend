@@ -1,48 +1,50 @@
-using System.Security.Claims;
+using HT.Application.Dto;
+using HT.Application.Dto.Requests;
 using HT.Application.Interfaces;
 using HT.Domain;
 using HT.Domain.Entities;
+using HT.Domain.Entities.Identity;
+using HT.Domain.Enums;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace HT.Infrastructure.Persistence;
 
-public class AuthService(HtContext context, JwtService jwtService) : IAuthService
+public class AuthService(UserManager<User> userManager, SignInManager<User> signInManager, JwtService jwtService)
+    : IAuthService
 {
-    public async Task<string> SignInAsync(ClaimsPrincipal claimsPrincipal, CancellationToken cancellationToken = default)
+    public async Task<bool> RegisterAsync(RegisterRequest request)
     {
-        var userName = claimsPrincipal.FindFirst(ClaimTypes.Name)?.Value;
-        var userEmail = claimsPrincipal.FindFirst(ClaimTypes.Email)?.Value;
+        var user = new User
+        {
+            UserName = request.Email, 
+            Email = request.Email, 
+            Subscriptions = new List<Subscription>
+            {
+                new()
+                {
+                    IsActive = true,
+                    Type = SubscriptionType.Free,
+                    StartDate = DateTime.UtcNow,
+                    EndDate = DateTime.MaxValue
+                }
+            }
+        };
+
+        var result = await userManager.CreateAsync(user, request.Password);
+        return result.Succeeded;
+    }
+
+    public async Task<string> SignInAsync(SignInRequest request)
+    {
+        var user = await userManager.Users
+            .Include(user => user.Subscriptions)
+            .FirstOrDefaultAsync(user => user.NormalizedUserName == request.Email.ToUpperInvariant()); 
         
-        if (string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(userEmail))
+        if (user == null)
             return string.Empty;
         
-        var user = await context.Users
-            .Include(user => user.Subscriptions)
-            .FirstOrDefaultAsync(user => user.Email == userEmail, cancellationToken: cancellationToken);
-
-        if (user == null)
-        {
-            user = new User
-            {
-                Name = userName,
-                Email = userEmail,
-                Subscriptions = new List<Subscription>
-                {
-                    new()
-                    {
-                        IsActive = true,
-                        Type = SubscriptionType.Free,
-                        StartDate = DateTime.UtcNow,
-                        EndDate = DateTime.MaxValue
-                    }
-                }
-            };
-            
-            await context.Users.AddAsync(user, cancellationToken);
-            await context.SaveChangesAsync(cancellationToken);
-        }
-
-        var token = jwtService.GenerateJwtToken(user);
-        return token;
+        var result = await signInManager.CheckPasswordSignInAsync(user, request.Password, false);
+        return !result.Succeeded ? string.Empty : jwtService.GenerateJwtToken(user);
     }
 }
