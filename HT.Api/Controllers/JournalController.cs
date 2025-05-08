@@ -6,10 +6,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HT.Api.Controllers;
 
-[Route("api/me/journal")]
+[Route("api/me/[Controller]")]
 [ApiController]
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-public class MyJournalController(IUserJournalService userJournalService) : ControllerBase
+public class JournalController(IUserJournalService userJournalService) : ControllerBase
 {
     public async Task<IActionResult> Get([FromQuery] DateTime date, CancellationToken cancellationToken)
     {

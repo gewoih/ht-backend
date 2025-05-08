@@ -4,10 +4,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HT.Api.Controllers;
 
-[Route("api/me/profile")]
+[Route("api/me/[Controller]")]
 [ApiController]
 [Authorize]
-public class MyProfileController(ICurrentUserService currentUserService) : ControllerBase
+public class ProfileController(ICurrentUserService currentUserService) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> Get(CancellationToken cancellationToken)
