@@ -18,6 +18,7 @@ public class UserHabitService(HtContext context, ICurrentUserService currentUser
 
     public async Task<List<HabitDto>> GetAsync(CancellationToken cancellationToken = default)
     {
+        //TODO: Маппер
         var currentUserId = currentUserService.GetId();
         return await context.UserHabits
             .Where(habit => habit.UserId == currentUserId)

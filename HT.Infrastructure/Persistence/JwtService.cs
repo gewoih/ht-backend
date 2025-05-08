@@ -20,10 +20,12 @@ public class JwtService(IConfiguration configuration)
             new Claim("subscription", user.CurrentSubscription.Type.ToString()),
         };
 
+        //TODO: Перенести в IOptions
         var jwtSecretKey = configuration["Auth:JWT:SecretKey"];
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey));
         var signingCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
+        //TODO: Перенести в конфиг
         var token = new JwtSecurityToken(
             issuer: "https://localhost:5001",
             audience: "https://localhost:8081",

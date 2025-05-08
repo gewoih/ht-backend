@@ -38,6 +38,7 @@ public sealed class UserJournalService(HtContext context, ICurrentUserService cu
         }
         else
         {
+            //TODO: Маппер
             var newLog = new JournalLog
             {
                 UserId = request.UserId,
@@ -60,6 +61,7 @@ public sealed class UserJournalService(HtContext context, ICurrentUserService cu
 
     public async Task<List<JournalLogDto>> GetLogsAsync(CancellationToken cancellationToken = default)
     {
+        //TODO: Маппер
         return await context.JournalLogs
             .Select(journalLog =>
                 new JournalLogDto(journalLog.Date, journalLog.HealthScore, journalLog.EnergyScore, journalLog.MoodScore,

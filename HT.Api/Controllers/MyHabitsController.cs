@@ -7,7 +7,7 @@ namespace HT.Api.Controllers;
 
 [Route("api/me/habits")]
 [ApiController]
-[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+[Authorize]
 public class MyHabitsController(IUserHabitService userHabitService) : ControllerBase
 {
     [HttpPut]
