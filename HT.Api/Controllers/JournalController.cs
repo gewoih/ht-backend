@@ -11,7 +11,7 @@ namespace HT.Api.Controllers;
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 public class JournalController(IUserJournalService userJournalService) : ControllerBase
 {
-    public async Task<IActionResult> Get([FromQuery] DateTime date, CancellationToken cancellationToken)
+    public async Task<IActionResult> Get([FromQuery] DateOnly date, CancellationToken cancellationToken)
     {
         var journalLog = await userJournalService.GetAsync(date, cancellationToken);
         return journalLog != null ? Ok(journalLog) : NotFound();

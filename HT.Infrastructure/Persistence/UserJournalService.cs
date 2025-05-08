@@ -3,37 +3,37 @@ using HT.Application.Dto.Requests;
 using HT.Application.Interfaces;
 using HT.Application.Mappers;
 using HT.Domain.Entities;
+using HT.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 
 namespace HT.Infrastructure.Persistence;
 
 public sealed class UserJournalService(HtContext context, ICurrentUserService currentUserService) : IUserJournalService
 {
-    public async Task<JournalLogDto?> GetAsync(DateTime date, CancellationToken cancellationToken = default)
+    public async Task<JournalLogDto?> GetAsync(DateOnly date, CancellationToken cancellationToken = default)
     {
         return await context.JournalLogs
-            .Where(journalLog => journalLog.Date == date.Date.ToUniversalTime())
+            .Where(journalLog => journalLog.Date == date)
             .Select(journalLog => journalLog.ToDto())
             .FirstOrDefaultAsync(cancellationToken: cancellationToken);
     }
 
     public async Task CreateAsync(CreateJournalLogRequest request, CancellationToken cancellationToken = default)
     {
-        var journalLogDateUtc = request.Date.ToUniversalTime();
         var currentUserId = currentUserService.GetUserId();
 
-        var existingLog = await GetByUserAndDateAsync(currentUserId, journalLogDateUtc, cancellationToken);
+        var existingLog = await GetByUserAndDateAsync(currentUserId, request.Date, cancellationToken);
 
         if (existingLog != null)
         {
-            existingLog.UpdateScores(request.HealthScore, request.EnergyScore, request.MoodScore);
+            existingLog.Score = new DailyScore(request.HealthScore, request.EnergyScore, request.MoodScore);
             existingLog.HabitLogs = request.HabitLogs.Select(habitLog => habitLog.ToDomain()).ToList();
         }
         else
         {
+            var dailyScore = new DailyScore(request.HealthScore, request.EnergyScore, request.MoodScore);
             var habitLogs = request.HabitLogs.Select(habitLog => habitLog.ToDomain()).ToList();
-            var newLog = new JournalLog(request.UserId, journalLogDateUtc, request.HealthScore, request.EnergyScore,
-                request.MoodScore, habitLogs);
+            var newLog = new JournalLog(request.UserId, request.Date, dailyScore, habitLogs);
             
             await context.JournalLogs.AddAsync(newLog, cancellationToken);
         }
@@ -48,10 +48,10 @@ public sealed class UserJournalService(HtContext context, ICurrentUserService cu
             .ToListAsync(cancellationToken: cancellationToken);
     }
 
-    private async Task<JournalLog?> GetByUserAndDateAsync(Guid userId, DateTime dateUtc, CancellationToken ct = default)
+    private async Task<JournalLog?> GetByUserAndDateAsync(Guid userId, DateOnly date, CancellationToken ct = default)
     {
         return await context.JournalLogs
             .Include(j => j.HabitLogs)
-            .FirstOrDefaultAsync(j => j.UserId == userId && j.Date == dateUtc, ct);
+            .FirstOrDefaultAsync(j => j.UserId == userId && j.Date == date, ct);
     }
 }

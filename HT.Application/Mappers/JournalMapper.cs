@@ -8,9 +8,7 @@ public static class JournalMapper
     public static JournalLogDto ToDto(this JournalLog journalLog) => new()
     {
         Date = journalLog.Date,
-        HealthScore = journalLog.HealthScore,
-        EnergyScore = journalLog.EnergyScore,
-        MoodScore = journalLog.MoodScore,
+        DailyScore = journalLog.Score,
         HabitLogs = journalLog.HabitLogs.Select(habitLog => habitLog.ToDto())
     };
 }

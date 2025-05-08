@@ -13,7 +13,7 @@ public class NeuralEngine
     public Dictionary<Guid, double> GetHabitsImportance(List<JournalLogDto> journalLogs)
     {
         var habitIds = GetHabitIds(journalLogs);
-        var avgScore = (float)journalLogs.Average(j => j.Score);
+        var avgScore = (float)journalLogs.Average(journalLogDto => journalLogDto.DailyScore.Total);
 
         var rows = BuildRows(journalLogs, habitIds, avgScore);
         var mlContext = new MLContext(seed: 228);
@@ -62,11 +62,11 @@ public class NeuralEngine
             .ToList();
 
     private List<HabitData> BuildRows(
-        List<JournalLogDto> logs,
+        List<JournalLogDto> journalLogDtos,
         List<Guid> habitIds,
         float avgScore)
     {
-        var ordered = logs.OrderBy(l => l.Date).ToList();
+        var ordered = journalLogDtos.OrderBy(journalLogDto => journalLogDto.Date).ToList();
 
         // вспомогательные буферы для Sum7 и Streak
         var rolling = habitIds.ToDictionary(id => id, _ => new Queue<int>(7));
@@ -85,7 +85,7 @@ public class NeuralEngine
             rows.Add(new HabitData
             {
                 Features = features,
-                Label = ordered[d].Score - avgScore
+                Label = ordered[d].DailyScore.Total - avgScore
             });
         }
 
