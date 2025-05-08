@@ -20,7 +20,7 @@ public sealed class UserJournalService(HtContext context, ICurrentUserService cu
     public async Task CreateAsync(CreateJournalLogRequest request, CancellationToken cancellationToken = default)
     {
         var journalLogDateUtc = request.Date.ToUniversalTime();
-        var currentUserId = currentUserService.GetId();
+        var currentUserId = currentUserService.GetUserId();
 
         var existingLog = await GetByUserAndDateAsync(currentUserId, journalLogDateUtc, cancellationToken);
 

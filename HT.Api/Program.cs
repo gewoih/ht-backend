@@ -2,7 +2,6 @@ using System.Text;
 using HT.Application.Interfaces;
 using HT.Domain.Entities;
 using HT.Domain.Entities.Identity;
-using HT.Infrastructure.Auth;
 using HT.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -13,6 +12,7 @@ using Microsoft.IdentityModel.Tokens;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
+builder.Services.AddProblemDetails();
 
 builder.Services.AddCors(options =>
 {

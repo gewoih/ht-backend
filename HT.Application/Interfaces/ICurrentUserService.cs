@@ -1,6 +1,9 @@
+using HT.Application.Dto;
+
 namespace HT.Application.Interfaces;
 
 public interface ICurrentUserService
 {
-    Guid GetId();
+    Guid GetUserId();
+    Task<UserProfile?> GetUserProfileAsync(CancellationToken cancellationToken = default);
 }

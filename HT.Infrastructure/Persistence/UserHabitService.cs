@@ -10,7 +10,7 @@ public class UserHabitService(HtContext context, ICurrentUserService currentUser
 {
     public async Task<List<Guid>> GetIdsAsync(CancellationToken cancellationToken = default)
     {
-        var currentUserId = currentUserService.GetId();
+        var currentUserId = currentUserService.GetUserId();
         return await context.UserHabits
             .Where(habit => habit.UserId == currentUserId)
             .Select(userHabit => userHabit.HabitId)
@@ -19,7 +19,7 @@ public class UserHabitService(HtContext context, ICurrentUserService currentUser
 
     public async Task<List<HabitDto>> GetAsync(CancellationToken cancellationToken = default)
     {
-        var currentUserId = currentUserService.GetId();
+        var currentUserId = currentUserService.GetUserId();
         return await context.UserHabits
             .Where(habit => habit.UserId == currentUserId)
             .Select(userHabit => userHabit.ToDto())
@@ -28,7 +28,7 @@ public class UserHabitService(HtContext context, ICurrentUserService currentUser
 
     public async Task ReplaceAsync(List<Guid> habitIds, CancellationToken cancellationToken = default)
     {
-        var currentUserId = currentUserService.GetId();
+        var currentUserId = currentUserService.GetUserId();
         var existingUserHabits = await context.UserHabits
             .Where(uh => uh.UserId == currentUserId)
             .ToListAsync(cancellationToken: cancellationToken);
