@@ -13,6 +13,7 @@ public sealed class UserJournalService(HtContext context, ICurrentUserService cu
     public async Task<JournalLogDto?> GetAsync(DateOnly date, CancellationToken cancellationToken = default)
     {
         return await context.JournalLogs
+            .Include(journalLog => journalLog.HabitLogs)
             .Where(journalLog => journalLog.Date == date)
             .Select(journalLog => journalLog.ToDto())
             .FirstOrDefaultAsync(cancellationToken: cancellationToken);
@@ -21,19 +22,18 @@ public sealed class UserJournalService(HtContext context, ICurrentUserService cu
     public async Task CreateAsync(CreateJournalLogRequest request, CancellationToken cancellationToken = default)
     {
         var currentUserId = currentUserService.GetUserId();
-
         var existingLog = await GetByUserAndDateAsync(currentUserId, request.Date, cancellationToken);
 
         if (existingLog != null)
         {
-            existingLog.Score = new DailyScore(request.HealthScore, request.EnergyScore, request.MoodScore);
+            existingLog.Score = request.DailyScore;
             existingLog.HabitLogs = request.HabitLogs.Select(habitLog => habitLog.ToDomain()).ToList();
         }
         else
         {
-            var dailyScore = new DailyScore(request.HealthScore, request.EnergyScore, request.MoodScore);
+            var dailyScore = request.DailyScore;
             var habitLogs = request.HabitLogs.Select(habitLog => habitLog.ToDomain()).ToList();
-            var newLog = new JournalLog(request.UserId, request.Date, dailyScore, habitLogs);
+            var newLog = new JournalLog(currentUserId, request.Date, dailyScore, habitLogs);
             
             await context.JournalLogs.AddAsync(newLog, cancellationToken);
         }

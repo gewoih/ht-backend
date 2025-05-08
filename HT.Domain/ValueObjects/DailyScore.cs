@@ -1,9 +1,11 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace HT.Domain.ValueObjects;
 
 [ComplexType]
 public record DailyScore(int Health, int Energy, int Mood)
 {
+    [JsonIgnore]
     public int Total => Health + Energy + Mood;
 }

@@ -9,6 +9,6 @@ public static class JournalMapper
     {
         Date = journalLog.Date,
         DailyScore = journalLog.Score,
-        HabitLogs = journalLog.HabitLogs.Select(habitLog => habitLog.ToDto())
+        HabitLogs = journalLog.HabitLogs is not null ? journalLog.HabitLogs.Select(habitLog => habitLog.ToDto()) : []
     };
 }

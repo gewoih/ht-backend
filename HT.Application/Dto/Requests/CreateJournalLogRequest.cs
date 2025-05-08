@@ -1,9 +1,5 @@
+using HT.Domain.ValueObjects;
+
 namespace HT.Application.Dto.Requests;
 
-public record CreateJournalLogRequest(
-    Guid UserId,
-    DateOnly Date,
-    IEnumerable<HabitLogDto> HabitLogs,
-    int HealthScore,
-    int EnergyScore,
-    int MoodScore);
+public readonly record struct CreateJournalLogRequest(DateOnly Date, IEnumerable<HabitLogDto> HabitLogs, DailyScore DailyScore);

@@ -30,7 +30,7 @@ public class JwtService(IConfiguration configuration)
             issuer: "https://localhost:5001",
             audience: "https://localhost:8081",
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(30),
+            expires: DateTime.UtcNow.AddDays(7),
             signingCredentials: signingCredentials);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
