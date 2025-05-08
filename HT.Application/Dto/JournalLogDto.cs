@@ -2,18 +2,15 @@ using System.Text.Json.Serialization;
 
 namespace HT.Application.Dto;
 
-public class JournalLogDto(
-    DateTime date,
-    int healthScore,
-    int energyScore,
-    int moodScore,
-    IEnumerable<HabitLogDto> habitLogs)
+public class JournalLogDto
 {
-    public DateTime Date { get; init; } = date;
-    public int HealthScore { get; init; } = healthScore;
-    public int EnergyScore { get; init; } = energyScore;
-    public int MoodScore { get; init; } = moodScore;
+    public DateTime Date { get; set; }
+    public int HealthScore { get; set; }
+    public int EnergyScore { get; set; }
+    public int MoodScore { get; set; }
 
     [JsonIgnore] public int Score => HealthScore + EnergyScore + MoodScore;
-    public IEnumerable<HabitLogDto> HabitLogs { get; init; } = habitLogs;
+    public IEnumerable<HabitLogDto> HabitLogs { get; set; }
+    
+    public void UpdateHabitLogs(IEnumerable<HabitLogDto> habitLogs) => HabitLogs = habitLogs;
 }

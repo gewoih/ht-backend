@@ -16,7 +16,6 @@ public class InsightService(
         var filteredHabitLogs = GetFilteredJournalLogs(journalLogs);
         var importanceMap = neuralEngine.GetHabitsImportance(filteredHabitLogs);
 
-        //TODO: Маппер
         var insights = importanceMap
             .Select(kvp => new InsightDto(habits.First(habit => habit.Id == kvp.Key), kvp.Value))
             .OrderByDescending(insight => insight.Influence)
@@ -44,12 +43,16 @@ public class InsightService(
             .Distinct()
             .ToHashSet();
 
-        //TODO: Маппер
-        var filteredJournalLogs = journalLogs.Select(journalLog =>
-                new JournalLogDto(journalLog.Date, journalLog.HealthScore, journalLog.EnergyScore, journalLog.MoodScore,
-                    journalLog.HabitLogs.Where(habitLog => allowedHabitIds.Contains(habitLog.HabitId))))
-            .Where(j => j.HabitLogs.Any())
-            .ToList();
+        var filteredJournalLogs = new List<JournalLogDto>();
+        foreach (var journalLog in journalLogs)
+        {
+            var habitLogs = journalLog.HabitLogs
+                .Where(habitLog => allowedHabitIds.Contains(habitLog.HabitId));
+            
+            journalLog.UpdateHabitLogs(habitLogs);
+            if (journalLog.HabitLogs.Any())
+                filteredJournalLogs.Add(journalLog);
+        }
 
         return filteredJournalLogs;
     }

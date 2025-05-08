@@ -12,5 +12,5 @@ public class HabitLog : Entity
     [Required]
     public Habit Habit { get; set; }
     
-    public float Value { get; set; }
+    public bool Value { get; set; }
 }

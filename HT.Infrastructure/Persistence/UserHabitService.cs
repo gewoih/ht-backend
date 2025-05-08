@@ -1,5 +1,6 @@
 using HT.Application.Dto;
 using HT.Application.Interfaces;
+using HT.Application.Mappers;
 using HT.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,11 +19,10 @@ public class UserHabitService(HtContext context, ICurrentUserService currentUser
 
     public async Task<List<HabitDto>> GetAsync(CancellationToken cancellationToken = default)
     {
-        //TODO: Маппер
         var currentUserId = currentUserService.GetId();
         return await context.UserHabits
             .Where(habit => habit.UserId == currentUserId)
-            .Select(userHabit => new HabitDto(userHabit.Habit!.Id, userHabit.Habit.Category, userHabit.Habit.Name))
+            .Select(userHabit => userHabit.ToDto())
             .ToListAsync(cancellationToken: cancellationToken);
     }
 

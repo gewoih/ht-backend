@@ -8,7 +8,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace HT.Common.Migrations
+namespace HT.Infrastructure.Migrations
 {
     [DbContext(typeof(HtContext))]
     partial class HtContextModelSnapshot : ModelSnapshot
@@ -61,8 +61,8 @@ namespace HT.Common.Migrations
                     b.Property<Guid>("JournalLogId")
                         .HasColumnType("uuid");
 
-                    b.Property<float>("Value")
-                        .HasColumnType("real");
+                    b.Property<bool>("Value")
+                        .HasColumnType("boolean");
 
                     b.HasKey("Id");
 
@@ -73,36 +73,7 @@ namespace HT.Common.Migrations
                     b.ToTable("HabitLogs");
                 });
 
-            modelBuilder.Entity("HT.Domain.Entities.JournalLog", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("text");
-
-                    b.Property<int>("EnergyScore")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("HealthScore")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("MoodScore")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("JournalLogs");
-                });
-
-            modelBuilder.Entity("HT.Domain.Entities.Role", b =>
+            modelBuilder.Entity("HT.Domain.Entities.Identity.Role", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -129,35 +100,7 @@ namespace HT.Common.Migrations
                     b.ToTable("AspNetRoles", (string)null);
                 });
 
-            modelBuilder.Entity("HT.Domain.Entities.Subscription", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Subscriptions");
-                });
-
-            modelBuilder.Entity("HT.Domain.Entities.User", b =>
+            modelBuilder.Entity("HT.Domain.Entities.Identity.User", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -221,6 +164,63 @@ namespace HT.Common.Migrations
                         .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("HT.Domain.Entities.JournalLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<int>("EnergyScore")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("HealthScore")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("MoodScore")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("JournalLogs");
+                });
+
+            modelBuilder.Entity("HT.Domain.Entities.Subscription", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Subscriptions");
                 });
 
             modelBuilder.Entity("HT.Domain.Entities.UserHabit", b =>
@@ -381,7 +381,7 @@ namespace HT.Common.Migrations
 
             modelBuilder.Entity("HT.Domain.Entities.Subscription", b =>
                 {
-                    b.HasOne("HT.Domain.Entities.User", "User")
+                    b.HasOne("HT.Domain.Entities.Identity.User", "User")
                         .WithMany("Subscriptions")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -398,7 +398,7 @@ namespace HT.Common.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("HT.Domain.Entities.User", "User")
+                    b.HasOne("HT.Domain.Entities.Identity.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -417,7 +417,7 @@ namespace HT.Common.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("HT.Domain.Entities.User", null)
+                    b.HasOne("HT.Domain.Entities.Identity.User", null)
                         .WithMany()
                         .HasForeignKey("UsersId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -426,7 +426,7 @@ namespace HT.Common.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
-                    b.HasOne("HT.Domain.Entities.Role", null)
+                    b.HasOne("HT.Domain.Entities.Identity.Role", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -435,7 +435,7 @@ namespace HT.Common.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
                 {
-                    b.HasOne("HT.Domain.Entities.User", null)
+                    b.HasOne("HT.Domain.Entities.Identity.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -444,7 +444,7 @@ namespace HT.Common.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
                 {
-                    b.HasOne("HT.Domain.Entities.User", null)
+                    b.HasOne("HT.Domain.Entities.Identity.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -453,13 +453,13 @@ namespace HT.Common.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
                 {
-                    b.HasOne("HT.Domain.Entities.Role", null)
+                    b.HasOne("HT.Domain.Entities.Identity.Role", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("HT.Domain.Entities.User", null)
+                    b.HasOne("HT.Domain.Entities.Identity.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -468,21 +468,21 @@ namespace HT.Common.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
                 {
-                    b.HasOne("HT.Domain.Entities.User", null)
+                    b.HasOne("HT.Domain.Entities.Identity.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("HT.Domain.Entities.Identity.User", b =>
+                {
+                    b.Navigation("Subscriptions");
+                });
+
             modelBuilder.Entity("HT.Domain.Entities.JournalLog", b =>
                 {
                     b.Navigation("HabitLogs");
-                });
-
-            modelBuilder.Entity("HT.Domain.Entities.User", b =>
-                {
-                    b.Navigation("Subscriptions");
                 });
 #pragma warning restore 612, 618
         }
