@@ -7,6 +7,9 @@ namespace HT.Domain.Entities;
 public sealed class Habit : NamedEntity
 {
     [Required]
+    public int Impact { get; set; }
+    
+    [Required]
     public string Category { get; set; }
     
     [Required]

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using HT.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HT.Infrastructure.Migrations
 {
     [DbContext(typeof(HtContext))]
-    partial class HtContextModelSnapshot : ModelSnapshot
+    [Migration("20250512053229_Init3")]
+    partial class Init3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -189,9 +192,6 @@ namespace HT.Infrastructure.Migrations
                         {
                             b1.IsRequired();
 
-                            b1.Property<int>("Calmness")
-                                .HasColumnType("integer");
-
                             b1.Property<int>("Energy")
                                 .HasColumnType("integer");
 
@@ -199,12 +199,6 @@ namespace HT.Infrastructure.Migrations
                                 .HasColumnType("integer");
 
                             b1.Property<int>("Mood")
-                                .HasColumnType("integer");
-
-                            b1.Property<int>("Satisfaction")
-                                .HasColumnType("integer");
-
-                            b1.Property<int>("Sleep")
                                 .HasColumnType("integer");
                         });
 
