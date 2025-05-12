@@ -6,13 +6,14 @@ namespace HT.Infrastructure.Persistence;
 public class InsightService(
     IHabitService habitService,
     IUserJournalService userJournalService,
+    ICurrentUserService currentUserService,
     NeuralEngine neuralEngine) : IInsightService
 {
     public async Task<List<InsightDto>> GetInsightsAsync(CancellationToken cancellationToken = default)
     {
+        var currentUser = currentUserService.GetUserId();
         var habits = await habitService.GetAsync(cancellationToken);
-
-        var journalLogs = await userJournalService.GetLogsAsync(cancellationToken);
+        var journalLogs = await userJournalService.GetAsync(currentUser, cancellationToken);
         var filteredHabitLogs = GetFilteredJournalLogs(journalLogs);
         var importanceMap = neuralEngine.GetHabitsImportance(filteredHabitLogs);
 

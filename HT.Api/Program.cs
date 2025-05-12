@@ -66,6 +66,7 @@ builder.Services.AddScoped<IUserHabitService, UserHabitService>();
 builder.Services.AddScoped<IInsightService, InsightService>();
 builder.Services.AddScoped<IUserJournalService, UserJournalService>();
 builder.Services.AddScoped<IUserAnalyticsService, UserAnalyticsService>();
+builder.Services.AddScoped<ILeaderboardService, LeaderboardService>();
 
 var app = builder.Build();
 using var scope = app.Services.CreateScope();

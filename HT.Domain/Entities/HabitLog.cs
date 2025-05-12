@@ -6,11 +6,10 @@ namespace HT.Domain.Entities;
 public class HabitLog : Entity
 {
     public Guid JournalLogId { get; set; }
+    public virtual JournalLog JournalLog { get; set; }
     
     public Guid HabitId { get; set; }
-    
-    [Required]
-    public Habit Habit { get; set; }
+    public virtual Habit Habit { get; set; }
     
     public bool Value { get; set; }
 }

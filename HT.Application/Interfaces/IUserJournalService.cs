@@ -5,7 +5,7 @@ namespace HT.Application.Interfaces;
 
 public interface IUserJournalService
 {
-    Task<List<JournalLogDto>> GetLogsAsync(CancellationToken cancellationToken = default);
+    Task<List<JournalLogDto>> GetAsync(Guid userId, CancellationToken cancellationToken = default);
     Task<JournalLogDto?> GetAsync(DateOnly date, CancellationToken cancellationToken = default);
     Task CreateAsync(CreateJournalLogRequest request, CancellationToken cancellationToken = default);
 }
