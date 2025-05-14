@@ -28,4 +28,10 @@
       <ProjectReference Include="..\HT.Infrastructure\HT.Infrastructure.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Content Include="..\Dockerfile">
+        <Link>Dockerfile</Link>
+      </Content>
+    </ItemGroup>
+
 </Project>

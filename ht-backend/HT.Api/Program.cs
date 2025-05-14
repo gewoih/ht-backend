@@ -18,7 +18,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("VueFrontend", policy =>
     {
-        policy.WithOrigins("https://localhost:8081")
+        policy.WithOrigins("http://localhost:8080")
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
@@ -44,8 +44,8 @@ builder.Services.AddAuthentication(options =>
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey!)),
-            ValidIssuer = "https://localhost:5001",
-            ValidAudience = "https://localhost:8081"
+            ValidIssuer = "http://localhost:5000",
+            ValidAudience = "http://localhost:8080"
         };
     }); 
 builder.Services.AddAuthorization();

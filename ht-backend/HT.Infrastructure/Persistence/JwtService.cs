@@ -27,8 +27,8 @@ public class JwtService(IConfiguration configuration)
 
         //TODO: Перенести в конфиг
         var token = new JwtSecurityToken(
-            issuer: "https://localhost:5001",
-            audience: "https://localhost:8081",
+            issuer: "http://localhost:5000",
+            audience: "http://localhost:8080",
             claims: claims,
             expires: DateTime.UtcNow.AddDays(7),
             signingCredentials: signingCredentials);

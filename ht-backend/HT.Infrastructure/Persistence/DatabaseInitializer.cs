@@ -8,7 +8,7 @@ namespace HT.Infrastructure.Persistence;
 
 public class DatabaseInitializer(HtContext context)
 {
-    private readonly string _habitsCsvFilePath = Path.Combine(AppContext.BaseDirectory, "data/habits.csv");
+    private readonly string _habitsCsvFilePath = Path.Combine(AppContext.BaseDirectory, "Data/habits.csv");
     
     public async Task SeedAsync()
     {
