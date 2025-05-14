@@ -132,36 +132,6 @@ const impactClass = computed(() => {
   margin: 0 auto;
 }
 
-.impact-positive-strong {
-  background-color: #e8f5e9;
-  color: #2e7d32;
-  border: 1px solid #81c784;
-}
-
-.impact-positive {
-  background-color: #f1f8e9;
-  color: #558b2f;
-  border: 1px solid #aed581;
-}
-
-.impact-negative {
-  background-color: #ffebee;
-  color: #c62828;
-  border: 1px solid #e57373;
-}
-
-.impact-negative-strong {
-  background-color: #ffebee;
-  color: #b71c1c;
-  border: 1px solid #ef5350;
-}
-
-.impact-neutral {
-  background-color: #f5f5f5;
-  color: #555;
-  border: 1px solid #ccc;
-}
-
 .details-section {
   padding: 0.5rem 0.2rem;
 }
