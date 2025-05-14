@@ -1,4 +1,4 @@
-﻿FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
 USER $APP_UID
 WORKDIR /app
 EXPOSE 8080
@@ -11,6 +11,9 @@ COPY ["HT.Api/HT.Api.csproj", "HT.Api/"]
 COPY ["HT.Application/HT.Application.csproj", "HT.Application/"]
 COPY ["HT.Domain/HT.Domain.csproj", "HT.Domain/"]
 COPY ["HT.Infrastructure/HT.Infrastructure.csproj", "HT.Infrastructure/"]
+RUN apt-get update && apt-get install -y curl && \
+    curl -I https://api.nuget.org/v3/index.json
+
 RUN dotnet restore "HT.Api/HT.Api.csproj"
 COPY . .
 WORKDIR "/src/HT.Api"
