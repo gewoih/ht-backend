@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="260" height="180" viewBox="0 0 260 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <ellipse cx="130" cy="160" rx="110" ry="18" fill="#E8F5E9" />
+  <!-- People -->
+  <circle cx="70" cy="90" r="28" fill="#81C784" />
+  <circle cx="190" cy="90" r="28" fill="#4CAF50" />
+  <circle cx="130" cy="70" r="32" fill="#A5D6A7" />
+  <!-- Faces -->
+  <ellipse cx="70" cy="90" rx="12" ry="14" fill="#fff" />
+  <ellipse cx="190" cy="90" rx="12" ry="14" fill="#fff" />
+  <ellipse cx="130" cy="70" rx="14" ry="16" fill="#fff" />
+  <!-- Smiles -->
+  <path d="M62 98 Q70 106 78 98" stroke="#388E3C" stroke-width="2" fill="none" />
+  <path d="M182 98 Q190 106 198 98" stroke="#2E7D32" stroke-width="2" fill="none" />
+  <path d="M120 78 Q130 88 140 78" stroke="#388E3C" stroke-width="2" fill="none" />
+  <!-- Arms -->
+  <path d="M98 110 Q80 130 60 120" stroke="#A5D6A7" stroke-width="6" fill="none" />
+  <path d="M162 110 Q180 130 200 120" stroke="#A5D6A7" stroke-width="6" fill="none" />
+  <!-- Decorative -->
+  <circle cx="40" cy="40" r="8" fill="#A5D6A7" opacity="0.3" />
+  <circle cx="220" cy="40" r="8" fill="#A5D6A7" opacity="0.3" />
+  <circle cx="40" cy="140" r="6" fill="#A5D6A7" opacity="0.3" />
+  <circle cx="220" cy="140" r="6" fill="#A5D6A7" opacity="0.3" />
+</svg> 

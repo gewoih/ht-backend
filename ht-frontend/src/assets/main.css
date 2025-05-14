@@ -1,0 +1,135 @@
+@import './base.css';
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  font-family: var(--font-family);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f8f9fa;
+  width: 100%;
+}
+
+#app {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.container {
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 1rem;
+  box-sizing: border-box;
+}
+
+a,
+.green {
+  text-decoration: none;
+  color: hsla(160, 100%, 37%, 1);
+  transition: 0.4s;
+  padding: 3px;
+}
+
+@media (hover: hover) {
+  a:hover {
+    background-color: hsla(160, 100%, 37%, 0.2);
+  }
+}
+
+@media (min-width: 1024px) {
+  body {
+    display: flex;
+    place-items: center;
+  }
+
+  #app {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Кастомные стили для PrimeVue */
+.p-component {
+  font-family: var(--font-family);
+}
+
+.p-card {
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  width: 100%;
+}
+
+.p-card-body {
+  padding: 0;
+}
+
+.p-card-content {
+  padding: 1.5rem;
+}
+
+.p-card-title {
+  padding: 1.25rem 1.5rem;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  text-align: center;
+}
+
+.p-checkbox-box {
+  border-radius: 4px;
+}
+
+.p-message {
+  margin-bottom: 1rem;
+}
+
+/* Стили для адаптивности таблиц */
+.p-datatable .p-datatable-tbody > tr > td {
+  padding: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.p-datatable .p-datatable-thead > tr > th {
+  padding: 0.5rem;
+  font-size: 0.95rem;
+}
+
+/* Стили для TabMenu */
+.p-tabmenu {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.p-tabmenu .p-tabmenu-nav {
+  display: flex;
+  justify-content: center;
+  border: none;
+  background: transparent;
+}
+
+.p-tabmenu-nav-container {
+  justify-content: center;
+}
+
+/* Центрирование кнопок и других элементов */
+.p-button-set,
+.p-buttonset {
+  display: flex;
+  justify-content: center;
+}

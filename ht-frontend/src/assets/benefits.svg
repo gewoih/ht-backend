@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="500" height="400" viewBox="0 0 500 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Elements -->
+  <circle cx="250" cy="200" r="180" fill="#E8F5E9" />
+  
+  <!-- Person -->
+  <circle cx="250" cy="150" r="40" fill="#81C784" />
+  <path d="M250 190 L250 300" stroke="#81C784" stroke-width="8" />
+  <path d="M250 220 L200 270" stroke="#81C784" stroke-width="8" />
+  <path d="M250 220 L300 270" stroke="#81C784" stroke-width="8" />
+  <path d="M250 300 L200 350" stroke="#81C784" stroke-width="8" />
+  <path d="M250 300 L300 350" stroke="#81C784" stroke-width="8" />
+  
+  <!-- Positive Effects -->
+  <circle cx="150" cy="100" r="30" fill="#FFD700" />
+  <text x="150" y="110" font-family="Arial" font-size="14" fill="white" text-anchor="middle">Энергия</text>
+  
+  <circle cx="350" cy="100" r="30" fill="#4CAF50" />
+  <text x="350" y="110" font-family="Arial" font-size="14" fill="white" text-anchor="middle">Здоровье</text>
+  
+  <circle cx="150" cy="300" r="30" fill="#2196F3" />
+  <text x="150" y="310" font-family="Arial" font-size="14" fill="white" text-anchor="middle">Фокус</text>
+  
+  <circle cx="350" cy="300" r="30" fill="#9C27B0" />
+  <text x="350" y="310" font-family="Arial" font-size="14" fill="white" text-anchor="middle">Счастье</text>
+  
+  <!-- Connection Lines -->
+  <path d="M250 150 L150 100" stroke="#81C784" stroke-width="2" stroke-dasharray="5,5" />
+  <path d="M250 150 L350 100" stroke="#81C784" stroke-width="2" stroke-dasharray="5,5" />
+  <path d="M250 300 L150 300" stroke="#81C784" stroke-width="2" stroke-dasharray="5,5" />
+  <path d="M250 300 L350 300" stroke="#81C784" stroke-width="2" stroke-dasharray="5,5" />
+  
+  <!-- Decorative Elements -->
+  <circle cx="100" cy="50" r="20" fill="#81C784" opacity="0.3" />
+  <circle cx="400" cy="50" r="20" fill="#81C784" opacity="0.3" />
+  <circle cx="100" cy="350" r="20" fill="#81C784" opacity="0.3" />
+  <circle cx="400" cy="350" r="20" fill="#81C784" opacity="0.3" />
+</svg> 
