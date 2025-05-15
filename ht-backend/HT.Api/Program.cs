@@ -29,7 +29,6 @@ builder.Services.AddIdentity<User, Role>()
     .AddEntityFrameworkStores<HtContext>()
     .AddDefaultTokenProviders();
 
-var jwtSecretKey = builder.Configuration["Auth:Jwt:SecretKey"];
 builder.Services.AddAuthentication(options =>
     {
         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -43,9 +42,9 @@ builder.Services.AddAuthentication(options =>
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey!)),
-            ValidIssuer = "http://localhost:5000",
-            ValidAudience = "http://localhost:8080"
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(AuthService.JwtSecretKey)),
+            ValidIssuer = AuthService.ValidIssuer,
+            ValidAudience = AuthService.ValidAudience,
         };
     }); 
 builder.Services.AddAuthorization();
@@ -57,7 +56,6 @@ builder.Services.AddDbContext<HtContext>(options => options.UseNpgsql(connection
 
 builder.Services.AddScoped<DatabaseInitializer>();
 builder.Services.AddScoped<NeuralEngine>();
-builder.Services.AddScoped<JwtService>();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();

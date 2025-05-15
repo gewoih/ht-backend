@@ -1,16 +1,14 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using HT.Domain.Entities;
 using HT.Domain.Entities.Identity;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
 namespace HT.Infrastructure.Persistence;
 
-public class JwtService(IConfiguration configuration)
+public static class JwtService
 {
-    public string GenerateJwtToken(User user)
+    public static string GenerateJwtToken(User user)
     {
         var claims = new[]
         {
@@ -20,15 +18,12 @@ public class JwtService(IConfiguration configuration)
             new Claim("subscription", user.CurrentSubscription.Type.ToString()),
         };
 
-        //TODO: Перенести в IOptions
-        var jwtSecretKey = configuration["Auth:JWT:SecretKey"];
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(AuthService.JwtSecretKey));
         var signingCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-        //TODO: Перенести в конфиг
         var token = new JwtSecurityToken(
-            issuer: "http://localhost:5000",
-            audience: "http://localhost:8080",
+            issuer: AuthService.ValidIssuer,
+            audience: AuthService.ValidAudience,
             claims: claims,
             expires: DateTime.UtcNow.AddDays(7),
             signingCredentials: signingCredentials);
