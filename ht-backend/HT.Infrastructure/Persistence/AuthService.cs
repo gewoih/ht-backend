@@ -1,3 +1,6 @@
+using System.Security.Cryptography;
+using System.Text;
+using HT.Application.Dto;
 using HT.Application.Dto.Requests;
 using HT.Application.Interfaces;
 using HT.Domain.Entities;
@@ -8,7 +11,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HT.Infrastructure.Persistence;
 
-public class AuthService(UserManager<User> userManager, SignInManager<User> signInManager)
+public class AuthService(
+    UserManager<User> userManager,
+    SignInManager<User> signInManager,
+    HtContext context)
     : IAuthService
 {
     public const string JwtSecretKey =
@@ -16,6 +22,7 @@ public class AuthService(UserManager<User> userManager, SignInManager<User> sign
 
     public const string ValidIssuer = "TrackMe.Api";
     public const string ValidAudience = "TrackMe.Spa";
+    public const string RefreshTokenCookieName = "refresh_token";
 
     public async Task<bool> RegisterAsync(RegisterRequest request)
     {
@@ -39,16 +46,93 @@ public class AuthService(UserManager<User> userManager, SignInManager<User> sign
         return result.Succeeded;
     }
 
-    public async Task<string> SignInAsync(SignInRequest request)
+    public async Task<TokenPairDto?> SignInAsync(SignInRequest request)
     {
         var user = await userManager.Users
             .Include(user => user.Subscriptions)
             .FirstOrDefaultAsync(user => user.NormalizedUserName == request.Email.ToUpperInvariant());
 
         if (user == null)
-            return string.Empty;
+            return null;
 
-        var result = await signInManager.CheckPasswordSignInAsync(user, request.Password, false);
-        return !result.Succeeded ? string.Empty : JwtService.GenerateJwtToken(user);
+        var result = await signInManager.PasswordSignInAsync(request.Email, request.Password, false, true);
+        if (!result.Succeeded)
+            return null;
+        
+        var accessToken = JwtService.GenerateJwtToken(user);
+        if (string.IsNullOrEmpty(accessToken))
+            return null;
+
+        var (rawRefreshToken, refreshToken) = JwtService.CreateRefreshToken(user.Id);
+        await context.RefreshTokens.AddAsync(refreshToken);
+        await context.SaveChangesAsync();
+
+        return new TokenPairDto(rawRefreshToken, accessToken);
+    }
+
+    public async Task<TokenPairDto?> RefreshAsync(string? refreshToken)
+    {
+        if (string.IsNullOrWhiteSpace(refreshToken))
+            return null;
+
+        var hash = SHA512.HashData(Encoding.UTF8.GetBytes(refreshToken));
+        var refreshTokenEntity = await context.RefreshTokens
+            .Include(token => token.User)
+            .ThenInclude(user => user.Subscriptions)
+            .SingleOrDefaultAsync(t => t.Hash == hash);
+
+        if (refreshTokenEntity is not { RevokedAt: null } || refreshTokenEntity.ExpiresAt <= DateTime.UtcNow)
+            return null;
+
+        if (refreshTokenEntity.ReplacedByTokenId != null)
+        {
+            await RevokeDescendantsAsync(refreshTokenEntity);
+            return null;
+        }
+
+        var accessToken = JwtService.GenerateJwtToken(refreshTokenEntity.User);
+        var (newRawRefreshToken, newRefreshToken) = JwtService.CreateRefreshToken(refreshTokenEntity.UserId);
+
+        refreshTokenEntity.RevokedAt = DateTime.UtcNow;
+        refreshTokenEntity.ReplacedByTokenId = newRefreshToken.Id;
+
+        await context.RefreshTokens.AddAsync(newRefreshToken);
+        await context.SaveChangesAsync();
+
+        return new TokenPairDto(newRawRefreshToken, accessToken);
+    }
+
+    public async Task<bool> LogoutAsync(string? refreshToken)
+    {
+        if (string.IsNullOrWhiteSpace(refreshToken))
+            return false;
+        
+        var refreshTokenHash = SHA512.HashData(Encoding.UTF8.GetBytes(refreshToken));
+        var refreshTokenEntity = await context.RefreshTokens.SingleOrDefaultAsync(x => x.Hash == refreshTokenHash);
+        if (refreshTokenEntity != null) 
+            refreshTokenEntity.RevokedAt = DateTime.UtcNow;
+        
+        await context.SaveChangesAsync();
+        return true;
+    }
+
+    private async Task RevokeDescendantsAsync(RefreshToken token)
+    {
+        var stack = new Stack<RefreshToken>();
+        stack.Push(token);
+
+        while (stack.Count != 0)
+        {
+            var current = stack.Pop();
+            var children = await context.RefreshTokens
+                .Where(t => t.ReplacedByTokenId == current.Id && t.RevokedAt == null)
+                .ToListAsync();
+
+            foreach (var child in children)
+            {
+                child.RevokedAt = DateTime.UtcNow;
+                stack.Push(child);
+            }
+        }
     }
 }

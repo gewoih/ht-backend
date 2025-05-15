@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using HT.Domain.Entities.Identity;
 using Microsoft.IdentityModel.Tokens;
@@ -25,9 +26,23 @@ public static class JwtService
             issuer: AuthService.ValidIssuer,
             audience: AuthService.ValidAudience,
             claims: claims,
-            expires: DateTime.UtcNow.AddDays(7),
+            expires: DateTime.UtcNow.AddMinutes(5),
             signingCredentials: signingCredentials);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    public static (string, RefreshToken) CreateRefreshToken(Guid userId)
+    {
+        var rawRefreshToken = Convert.ToHexString(RandomNumberGenerator.GetBytes(64));
+        var refreshToken = new RefreshToken
+        {
+            Id = Guid.NewGuid(),
+            UserId = userId,
+            Hash = SHA512.HashData(Encoding.UTF8.GetBytes(rawRefreshToken)),
+            ExpiresAt = DateTime.UtcNow.AddDays(14)
+        };
+        
+        return (rawRefreshToken, refreshToken);
     }
 }
