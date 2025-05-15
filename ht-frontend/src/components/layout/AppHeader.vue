@@ -163,7 +163,7 @@ const profileMenuItems = ref([
 onMounted(() => {
   // Check authentication status and update local state if needed
   if (isAuthenticated() && !auth.isLoggedIn) {
-    auth.setToken(localStorage.getItem('jwt_token') || '')
+    auth.setToken(sessionStorage.getItem('access_token') || '')
   } else if (!isAuthenticated() && auth.isLoggedIn) {
     auth.clearToken()
   }
@@ -188,7 +188,7 @@ onBeforeUnmount(() => {
 const handleAuthChange = () => {
   // Force the component to recognize the auth state has changed
   if (isAuthenticated()) {
-    auth.setToken(localStorage.getItem('jwt_token') || '')
+    auth.setToken(sessionStorage.getItem('access_token') || '')
   }
 }
 

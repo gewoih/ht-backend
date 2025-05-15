@@ -1,48 +1,70 @@
-import axios from 'axios'
+import axios, { AxiosRequestConfig } from 'axios'
+import { API_ENDPOINTS } from '../config/api'
+
+const API_BASE_URL = (import.meta as any).env.VITE_API_BASE_URL
+
+interface RetryConfig extends AxiosRequestConfig {
+  _retry?: boolean
+}
 
 const http = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  baseURL: API_BASE_URL,
+  withCredentials: true,
+  headers: { 'Content-Type': 'application/json' },
 })
 
-// Add request interceptor to include JWT token
-http.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('jwt_token')
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
-    }
-    return config
-  },
-  (error) => {
-    return Promise.reject(error)
-  }
-)
+http.interceptors.request.use((cfg) => {
+  const t = sessionStorage.getItem('access_token')
+  if (t) cfg.headers.Authorization = `Bearer ${t}`
+  cfg.headers['X-CSRF'] = '1'
+  return cfg
+})
 
-// Create a flag to track if we're already handling a 401 error
-let isHandling401 = false
+let isRefreshing = false
+let queue: Array<(t: string) => void> = []
 
-// Add response interceptor to handle token expiration
 http.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    // Only handle 401 errors if we're not already handling one
-    if (error.response?.status === 401 && !isHandling401) {
-      isHandling401 = true
+  (r) => r,
+  async (err) => {
+    const original = err.config as RetryConfig
+    if (err.response?.status === 401 && !original._retry) {
+      original._retry = true
 
-      // Clear token from localStorage only
-      localStorage.removeItem('jwt_token')
+      if (isRefreshing) {
+        return new Promise((resolve) =>
+          queue.push((token) => {
+            if (!original.headers) original.headers = {}
+            original.headers.Authorization = `Bearer ${token}`
+            resolve(http(original))
+          })
+        )
+      }
 
-      // Reset flag after a small delay to prevent multiple handlers
-      setTimeout(() => {
-        isHandling401 = false
-      }, 1000)
+      isRefreshing = true
+      try {
+        const { data } = await axios.post(
+          `${API_BASE_URL}${API_ENDPOINTS.auth.refresh}`,
+          {},
+          { withCredentials: true, headers: { 'X-CSRF': '1' } }
+        )
+        const { accessToken } = data
+        sessionStorage.setItem('access_token', accessToken)
 
-      // Don't redirect here - let the component handle the error
+        queue.forEach((cb) => cb(accessToken))
+        queue = []
+
+        if (!original.headers) original.headers = {}
+        original.headers.Authorization = `Bearer ${accessToken}`
+        return http(original)
+      } catch (e) {
+        sessionStorage.removeItem('access_token')
+        queue = []
+        return Promise.reject(e)
+      } finally {
+        isRefreshing = false
+      }
     }
-    return Promise.reject(error)
+    return Promise.reject(err)
   }
 )
 

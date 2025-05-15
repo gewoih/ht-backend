@@ -2,17 +2,17 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
 export const useAuthStore = defineStore('auth', () => {
-  const jwtToken = ref(localStorage.getItem('jwt_token') || '')
+  const jwtToken = ref(sessionStorage.getItem('access_token') || '')
   const isLoggedIn = computed(() => Boolean(jwtToken.value))
 
   function setToken(token: string) {
     jwtToken.value = token
-    localStorage.setItem('jwt_token', token)
+    sessionStorage.setItem('access_token', token)
   }
 
   function clearToken() {
     jwtToken.value = ''
-    localStorage.removeItem('jwt_token')
+    sessionStorage.removeItem('access_token')
   }
 
   return {

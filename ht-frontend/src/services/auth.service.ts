@@ -1,7 +1,7 @@
 import { useRouter } from 'vue-router'
 import http from './http.service'
 import { API_ENDPOINTS } from '../config/api'
-import { log } from 'console'
+import { useAuthStore } from '../stores/authStore'
 
 interface LoginCredentials {
   email: string
@@ -16,9 +16,9 @@ interface RegisterCredentials {
 export const login = async (credentials: LoginCredentials) => {
   try {
     const response = await http.post(API_ENDPOINTS.auth.login, credentials)
-    console.log(response.data)
-    const token = response.data
-    localStorage.setItem('jwt_token', token)
+    const accessToken = response.data.accessToken
+    const authStore = useAuthStore()
+    authStore.setToken(accessToken)
     return { success: true, data: response.data }
   } catch (error) {
     return { success: false, error }
@@ -34,17 +34,52 @@ export const register = async (credentials: RegisterCredentials) => {
   }
 }
 
-export const logout = () => {
-  localStorage.removeItem('jwt_token')
-
+export const logout = async () => {
   try {
-    const router = useRouter()
-    router.push('/')
-  } catch {
-    window.location.href = '/'
+    // Call the logout API to invalidate the refresh token in cookies
+    await http.post(
+      API_ENDPOINTS.auth.logout,
+      {},
+      {
+        withCredentials: true,
+      }
+    )
+  } catch (error) {
+    console.error('Error during logout:', error)
+  } finally {
+    // Clear the access token regardless of API call success
+    const authStore = useAuthStore()
+    authStore.clearToken()
+
+    // Redirect to login page
+    try {
+      const router = useRouter()
+      router.push('/login')
+    } catch {
+      window.location.href = '/login'
+    }
+  }
+}
+
+export const refreshToken = async () => {
+  try {
+    const response = await http.post(
+      API_ENDPOINTS.auth.refresh,
+      {},
+      {
+        withCredentials: true, // Include cookies in the request
+      }
+    )
+    const { accessToken } = response.data
+    const authStore = useAuthStore()
+    authStore.setToken(accessToken)
+    return { success: true, data: response.data }
+  } catch (error) {
+    return { success: false, error }
   }
 }
 
 export const isAuthenticated = () => {
-  return !!localStorage.getItem('jwt_token')
+  const authStore = useAuthStore()
+  return authStore.isLoggedIn
 }

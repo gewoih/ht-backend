@@ -45,6 +45,7 @@ builder.Services.AddAuthentication(options =>
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(AuthService.JwtSecretKey)),
             ValidIssuer = AuthService.ValidIssuer,
             ValidAudience = AuthService.ValidAudience,
+            ClockSkew = TimeSpan.FromSeconds(30)
         };
     }); 
 builder.Services.AddAuthorization();
