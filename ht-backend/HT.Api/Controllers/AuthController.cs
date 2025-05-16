@@ -10,9 +10,9 @@ namespace HT.Api.Controllers;
 public class AuthController(IAuthService authService) : ControllerBase
 {
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterRequest request)
+    public async Task<IActionResult> Register([FromBody] RegisterRequest request, CancellationToken ct)
     {
-        var isRegistered = await authService.RegisterAsync(request);
+        var isRegistered = await authService.RegisterAsync(request, ct);
         if (!isRegistered)
             return BadRequest();
 
@@ -20,9 +20,9 @@ public class AuthController(IAuthService authService) : ControllerBase
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] SignInRequest request)
+    public async Task<IActionResult> Login([FromBody] SignInRequest request, CancellationToken ct)
     {
-        var tokenPairDto = await authService.SignInAsync(request);
+        var tokenPairDto = await authService.SignInAsync(request, ct);
         if (tokenPairDto == null)
             return Unauthorized();
 
@@ -31,11 +31,28 @@ public class AuthController(IAuthService authService) : ControllerBase
         return Ok(new { tokenPairDto.AccessToken });
     }
 
+    [HttpPost("email-confirmation")]
+    public async Task<IActionResult> SendEmailConfirmation([FromQuery] string email, CancellationToken ct)
+    {
+        var isSent = await authService.SendEmailConfirmation(email, ct);
+        return Ok(new { isSent });
+    }
+    
+    [HttpPost("confirm-email")]
+    public async Task<IActionResult> ConfirmEmail([FromQuery] string email, [FromQuery] int code, CancellationToken ct)
+    {
+        var isConfirmed = await authService.ConfirmEmailAsync(email, code, ct);
+        if (!isConfirmed)
+            return Unauthorized();
+        
+        return Ok();
+    }
+
     [HttpPost("logout")]
-    public async Task<IActionResult> Logout()
+    public async Task<IActionResult> Logout(CancellationToken ct)
     {
         var refreshToken = Request.Cookies[AuthService.RefreshTokenCookieName];
-        var isLoggedOut = await authService.LogoutAsync(refreshToken); 
+        var isLoggedOut = await authService.LogoutAsync(refreshToken, ct); 
         if (!isLoggedOut)
             return Unauthorized();
         
@@ -44,10 +61,10 @@ public class AuthController(IAuthService authService) : ControllerBase
     }
 
     [HttpPost("refresh")]
-    public async Task<IActionResult> Refresh()
+    public async Task<IActionResult> Refresh(CancellationToken ct)
     {
         var refreshToken = Request.Cookies[AuthService.RefreshTokenCookieName];
-        var tokenPairDto = await authService.RefreshAsync(refreshToken);
+        var tokenPairDto = await authService.RefreshAsync(refreshToken, ct);
         if (tokenPairDto is null)
             return Unauthorized();
 

@@ -14,6 +14,8 @@ namespace HT.Infrastructure.Persistence;
 public class AuthService(
     UserManager<User> userManager,
     SignInManager<User> signInManager,
+    IEmailService emailService,
+    ICurrentUserService currentUserService,
     HtContext context)
     : IAuthService
 {
@@ -24,11 +26,11 @@ public class AuthService(
     public const string ValidAudience = "TrackMe.Spa";
     public const string RefreshTokenCookieName = "refresh_token";
 
-    public async Task<bool> RegisterAsync(RegisterRequest request)
+    public async Task<bool> RegisterAsync(RegisterRequest request, CancellationToken ct = default)
     {
         var user = new User
         {
-            UserName = request.Email,
+            UserName = request.Username,
             Email = request.Email,
             Subscriptions = new List<Subscription>
             {
@@ -46,31 +48,32 @@ public class AuthService(
         return result.Succeeded;
     }
 
-    public async Task<TokenPairDto?> SignInAsync(SignInRequest request)
+    public async Task<TokenPairDto?> SignInAsync(SignInRequest request, CancellationToken ct = default)
     {
         var user = await userManager.Users
             .Include(user => user.Subscriptions)
-            .FirstOrDefaultAsync(user => user.NormalizedUserName == request.Email.ToUpperInvariant());
+            .FirstOrDefaultAsync(user => user.Email.ToLower() == request.Email.ToLower(),
+                cancellationToken: ct);
 
-        if (user == null)
+        if (user is null)
             return null;
 
-        var result = await signInManager.PasswordSignInAsync(request.Email, request.Password, false, true);
+        var result = await signInManager.CheckPasswordSignInAsync(user, request.Password, true);
         if (!result.Succeeded)
             return null;
-        
+
         var accessToken = JwtService.GenerateJwtToken(user);
         if (string.IsNullOrEmpty(accessToken))
             return null;
 
         var (rawRefreshToken, refreshToken) = JwtService.CreateRefreshToken(user.Id);
-        await context.RefreshTokens.AddAsync(refreshToken);
-        await context.SaveChangesAsync();
+        await context.RefreshTokens.AddAsync(refreshToken, ct);
+        await context.SaveChangesAsync(ct);
 
         return new TokenPairDto(rawRefreshToken, accessToken);
     }
 
-    public async Task<TokenPairDto?> RefreshAsync(string? refreshToken)
+    public async Task<TokenPairDto?> RefreshAsync(string? refreshToken, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(refreshToken))
             return null;
@@ -79,7 +82,7 @@ public class AuthService(
         var refreshTokenEntity = await context.RefreshTokens
             .Include(token => token.User)
             .ThenInclude(user => user.Subscriptions)
-            .SingleOrDefaultAsync(t => t.Hash == hash);
+            .SingleOrDefaultAsync(t => t.Hash == hash, cancellationToken: ct);
 
         if (refreshTokenEntity is not { RevokedAt: null } || refreshTokenEntity.ExpiresAt <= DateTime.UtcNow)
             return null;
@@ -96,24 +99,60 @@ public class AuthService(
         refreshTokenEntity.RevokedAt = DateTime.UtcNow;
         refreshTokenEntity.ReplacedByTokenId = newRefreshToken.Id;
 
-        await context.RefreshTokens.AddAsync(newRefreshToken);
-        await context.SaveChangesAsync();
+        await context.RefreshTokens.AddAsync(newRefreshToken, ct);
+        await context.SaveChangesAsync(ct);
 
         return new TokenPairDto(newRawRefreshToken, accessToken);
     }
 
-    public async Task<bool> LogoutAsync(string? refreshToken)
+    public async Task<bool> LogoutAsync(string? refreshToken, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(refreshToken))
             return false;
-        
+
         var refreshTokenHash = SHA512.HashData(Encoding.UTF8.GetBytes(refreshToken));
-        var refreshTokenEntity = await context.RefreshTokens.SingleOrDefaultAsync(x => x.Hash == refreshTokenHash);
-        if (refreshTokenEntity != null) 
+        var refreshTokenEntity = await context.RefreshTokens
+            .SingleOrDefaultAsync(x => x.Hash == refreshTokenHash, cancellationToken: ct);
+
+        if (refreshTokenEntity != null)
             refreshTokenEntity.RevokedAt = DateTime.UtcNow;
-        
-        await context.SaveChangesAsync();
+
+        await context.SaveChangesAsync(ct);
         return true;
+    }
+
+    public async Task<bool> SendEmailConfirmation(string email, CancellationToken ct = default)
+    {
+        var user = await context.Users
+            .Where(user => user.Email.ToLower() == email.ToLower())
+            .FirstOrDefaultAsync(ct);
+        
+        if (user is null)
+            return false;
+        
+        var code = await emailService.CreateEmailConfirmationCodeAsync(user, ct);
+        await emailService.SendEmailAsync(email, "Код подтверждения",
+            $"Ваш код подтверждения в сервисе Track-me.ru: {code}", ct);
+        
+        return true;
+    }
+
+    public async Task<bool> ConfirmEmailAsync(string email, int code, CancellationToken ct = default)
+    {
+        var user = await context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower(), ct);
+
+        var token = await context.EmailConfirmationCodes
+            .Where(emailConfirmationCode => emailConfirmationCode.UserId == user.Id &&
+                                            emailConfirmationCode.ExpiresAt > DateTime.UtcNow &&
+                                            emailConfirmationCode.Code == code)
+            .Select(emailConfirmationCode => emailConfirmationCode.Token)
+            .FirstOrDefaultAsync(cancellationToken: ct);
+
+        if (string.IsNullOrWhiteSpace(token))
+            return false;
+
+        var result = await userManager.ConfirmEmailAsync(user, token);
+        return result.Succeeded;
     }
 
     private async Task RevokeDescendantsAsync(RefreshToken token)

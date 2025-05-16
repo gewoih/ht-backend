@@ -8,6 +8,8 @@ export const API_ENDPOINTS = {
     register: `/auth/register`,
     refresh: `/auth/refresh`,
     logout: `/auth/logout`,
+    confirmEmail: `/auth/confirm-email`,
+    emailConfirmation: `/auth/email-confirmation`,
   },
   user: {
     profile: `/me/profile`,

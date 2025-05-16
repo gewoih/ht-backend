@@ -11,6 +11,7 @@ interface LoginCredentials {
 interface RegisterCredentials {
   email: string
   password: string
+  username: string
 }
 
 export const login = async (credentials: LoginCredentials) => {
@@ -28,6 +29,17 @@ export const login = async (credentials: LoginCredentials) => {
 export const register = async (credentials: RegisterCredentials) => {
   try {
     const response = await http.post(API_ENDPOINTS.auth.register, credentials)
+    return { success: true, data: response.data }
+  } catch (error) {
+    return { success: false, error }
+  }
+}
+
+export const confirmEmail = async (code: string, email: string) => {
+  try {
+    const response = await http.post(
+      `${API_ENDPOINTS.auth.confirmEmail}?code=${code}&email=${email}`
+    )
     return { success: true, data: response.data }
   } catch (error) {
     return { success: false, error }
@@ -82,4 +94,13 @@ export const refreshToken = async () => {
 export const isAuthenticated = () => {
   const authStore = useAuthStore()
   return authStore.isLoggedIn
+}
+
+export const sendEmailConfirmation = async (email: string) => {
+  try {
+    const response = await http.post(`${API_ENDPOINTS.auth.emailConfirmation}?email=${email}`)
+    return { success: true, data: response.data }
+  } catch (error) {
+    return { success: false, error }
+  }
 }

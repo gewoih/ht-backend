@@ -2,6 +2,7 @@ using System.Text;
 using HT.Application.Interfaces;
 using HT.Domain.Entities;
 using HT.Domain.Entities.Identity;
+using HT.Infrastructure.Identity;
 using HT.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -25,9 +26,16 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Services.AddIdentity<User, Role>()
+builder.Services.AddIdentity<User, Role>(o =>
+    {
+        o.SignIn.RequireConfirmedEmail = true;
+        o.Password.RequireNonAlphanumeric = false;
+        o.Password.RequiredUniqueChars = 4;
+        o.Password.RequiredLength = 8;
+    })
     .AddEntityFrameworkStores<HtContext>()
-    .AddDefaultTokenProviders();
+    .AddDefaultTokenProviders()
+    .AddErrorDescriber<RussianIdentityErrorDescriber>();
 
 builder.Services.AddAuthentication(options =>
     {
@@ -47,7 +55,7 @@ builder.Services.AddAuthentication(options =>
             ValidAudience = AuthService.ValidAudience,
             ClockSkew = TimeSpan.FromSeconds(30)
         };
-    }); 
+    });
 builder.Services.AddAuthorization();
 
 builder.Services.AddHttpContextAccessor();
@@ -66,6 +74,7 @@ builder.Services.AddScoped<IInsightService, InsightService>();
 builder.Services.AddScoped<IUserJournalService, UserJournalService>();
 builder.Services.AddScoped<IUserAnalyticsService, UserAnalyticsService>();
 builder.Services.AddScoped<ILeaderboardService, LeaderboardService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 var app = builder.Build();
 using var scope = app.Services.CreateScope();
