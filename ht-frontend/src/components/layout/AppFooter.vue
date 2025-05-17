@@ -31,7 +31,6 @@
   border-top: 1px solid #e0e0e0;
   padding-top: 2rem;
   padding-bottom: 1rem;
-  margin-top: 3rem;
   font-size: 1rem;
   color: #2c3e50;
 }
