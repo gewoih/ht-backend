@@ -65,7 +65,12 @@
         <template v-if="isLoggedIn">
           <Button class="profile-btn" :text="true" @click="toggleProfileMenu">
             <div class="profile-content">
-              <img :src="userAvatar" alt="User Avatar" class="avatar" />
+              <Avatar
+                :label="getUserInitial(userName)"
+                shape="circle"
+                class="avatar"
+                :style="{ backgroundColor: generateAvatarColor(userName) }"
+              />
               <span class="username">{{ userName || 'User' }}</span>
               <i class="pi pi-chevron-down"></i>
             </div>
@@ -151,7 +156,12 @@
       <div class="mobile-menu-footer">
         <template v-if="isLoggedIn">
           <div class="mobile-user-info">
-            <img :src="userAvatar" alt="User Avatar" class="mobile-avatar" />
+            <Avatar
+              :label="getUserInitial(userName)"
+              shape="circle"
+              class="mobile-avatar"
+              :style="{ backgroundColor: generateAvatarColor(userName) }"
+            />
             <div class="mobile-user-details">
               <h3>{{ userName || 'User' }}</h3>
               <p>{{ userEmail }}</p>
@@ -192,7 +202,12 @@
     <!-- Profile Dropdown -->
     <div v-if="showProfileMenu" class="profile-dropdown">
       <div class="profile-info">
-        <img :src="userAvatar" alt="User Avatar" class="dropdown-avatar" />
+        <Avatar
+          :label="getUserInitial(userName)"
+          shape="circle"
+          class="dropdown-avatar"
+          :style="{ backgroundColor: generateAvatarColor(userName) }"
+        />
         <div class="user-details">
           <h3>{{ userName || 'User' }}</h3>
           <p>{{ userEmail }}</p>
@@ -214,9 +229,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, onBeforeUnmount } from 'vue'
+import { ref, onMounted, computed, onBeforeUnmount, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import Button from 'primevue/button'
+import Avatar from 'primevue/avatar'
 import { logout, isAuthenticated } from '../../services/auth.service'
 import { useAuthStore } from '../../stores/authStore'
 
@@ -261,10 +277,61 @@ const toggleMobileSubmenu = () => {
   showMobileSubmenu.value = !showMobileSubmenu.value
 }
 
-// User data (mock for now)
+// User data from JWT token
 const userName = ref('')
 const userEmail = ref('')
-const userAvatar = ref('https://i.pravatar.cc/150?img=3')
+
+function parseJwt(token: string) {
+  try {
+    const base64Url = token.split('.')[1]
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    )
+    return JSON.parse(jsonPayload)
+  } catch (error) {
+    console.error('Error parsing JWT', error)
+    return {}
+  }
+}
+
+function loadUserDataFromToken() {
+  if (isAuthenticated()) {
+    const token = sessionStorage.getItem('access_token')
+    if (token) {
+      const decoded = parseJwt(token)
+      userName.value = decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'] || ''
+      userEmail.value =
+        decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'] || ''
+    }
+  } else {
+    userName.value = ''
+    userEmail.value = ''
+  }
+}
+
+// Generate color based on username
+function generateAvatarColor(username: string) {
+  if (!username) return '#4caf50'
+
+  // Simple hash function for consistent color
+  let hash = 0
+  for (let i = 0; i < username.length; i++) {
+    hash = username.charCodeAt(i) + ((hash << 5) - hash)
+  }
+
+  // Convert to hex color with good saturation and lightness (avoid too dark/light)
+  const hue = Math.abs(hash % 360)
+  return `hsl(${hue}, 65%, 55%)`
+}
+
+// Get user initial for avatar
+function getUserInitial(username: string): string {
+  return username && username.length > 0 ? username[0].toUpperCase() : ''
+}
 
 // Profile menu
 const showProfileMenu = ref(false)
@@ -281,6 +348,9 @@ onMounted(() => {
   } else if (!isAuthenticated() && auth.isLoggedIn) {
     auth.clearToken()
   }
+
+  // Load user data from token
+  loadUserDataFromToken()
 
   // Add event listener for auth changes
   window.addEventListener('auth:login-success', handleAuthChange)
@@ -311,8 +381,22 @@ const handleAuthChange = () => {
   // Force the component to recognize the auth state has changed
   if (isAuthenticated()) {
     auth.setToken(sessionStorage.getItem('access_token') || '')
+    loadUserDataFromToken()
   }
 }
+
+// Watch for auth state changes to reload user data
+watch(
+  () => auth.isLoggedIn,
+  (newVal) => {
+    if (newVal) {
+      loadUserDataFromToken()
+    } else {
+      userName.value = ''
+      userEmail.value = ''
+    }
+  }
+)
 
 const isActive = (path: string) => {
   return route.path === path
