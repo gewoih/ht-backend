@@ -27,7 +27,7 @@
           </div>
         </div>
         <div class="hero-image">
-          <img src="../assets/hero-image.svg" alt="Трекер привычек" />
+          <img src="../assets/images/analytics-chart.jpg" alt="Аналитика трекера привычек" />
         </div>
       </div>
     </section>
@@ -158,6 +158,24 @@
               Нейронные сети анализируют корреляции между вашими привычками и оценками самочувствия,
               выявляя, какие действия больше всего влияют на ваше состояние.
             </p>
+            <div class="analytics-images">
+              <div class="analytics-image">
+                <h4>Полезные привычки</h4>
+                <img
+                  src="../assets/images/positive-habits.jpg"
+                  alt="Полезные привычки"
+                  class="impact-image"
+                />
+              </div>
+              <div class="analytics-image">
+                <h4>Вредные привычки</h4>
+                <img
+                  src="../assets/images/negative-habits.jpg"
+                  alt="Вредные привычки"
+                  class="impact-image"
+                />
+              </div>
+            </div>
           </div>
 
           <div class="analytics-card">
@@ -169,6 +187,13 @@
               Отслеживайте изменения всех шести показателей самочувствия с течением времени,
               находите закономерности и тренды для достижения оптимального состояния.
             </p>
+            <div class="analytics-image">
+              <img
+                src="../assets/images/analytics-chart.jpg"
+                alt="Динамика показателей"
+                class="impact-image"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -650,6 +675,31 @@ onMounted(() => {
   margin-bottom: var(--spacing-lg);
 }
 
+.analytics-images {
+  display: flex;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.analytics-image {
+  flex: 1;
+  min-width: 250px;
+}
+
+.analytics-image h4 {
+  font-size: 1.1rem;
+  margin-bottom: var(--spacing-sm);
+  color: var(--text-color);
+  text-align: center;
+}
+
+.impact-image {
+  width: 100%;
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--box-shadow-sm);
+}
+
 /* Daily Tracking */
 .daily-tracking {
   padding: 6rem 0;
@@ -943,6 +993,10 @@ onMounted(() => {
 
   .features-grid {
     grid-template-columns: repeat(2, 1fr); /* 2 columns on tablet */
+  }
+
+  .analytics-images {
+    flex-direction: column;
   }
 }
 
