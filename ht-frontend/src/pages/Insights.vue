@@ -26,56 +26,67 @@
     </div>
     <div v-else class="insights-content">
       <h2 class="dashboard-title">Влияние ваших привычек</h2>
-      <div class="annotation">
-        <span class="annotation-item negative">
-          <div class="indicator negative"></div>
-          <span class="icon-label">Вредит</span>
-        </span>
-        <span class="annotation-item positive">
-          <div class="indicator positive"></div>
-          <span class="icon-label">Помогает</span>
-        </span>
-      </div>
-      <div v-for="item in sortedInsights" :key="item.habit.id" class="insight-card">
-        <div class="insight-header">
-          <span class="habit-name">{{ item.habit.name }}</span>
-          <span
-            class="influence-value"
-            :class="{
-              positive: item.influence > 0,
-              negative: item.influence < 0,
-              neutral: item.influence === 0,
-            }"
-          >
-            {{ item.influence > 0 ? '+' : '' }}{{ item.influence.toFixed(1) }}%
-          </span>
+
+      <!-- Positive habits section -->
+      <div v-if="positiveInsights.length" class="habits-section positive-section">
+        <h3 class="section-title positive"><i class="pi pi-arrow-up"></i> Полезные привычки</h3>
+        <div v-for="item in positiveInsights" :key="item.habit.id" class="insight-card">
+          <div class="insight-header">
+            <span class="habit-name">{{ item.habit.name }}</span>
+            <span class="influence-value positive"> +{{ item.influence.toFixed(1) }}% </span>
+          </div>
+          <div class="bar-center-container">
+            <div class="bar-bg"></div>
+            <div
+              class="bar bar-positive"
+              :style="{ width: item.normalized * 50 + '%', left: '50%' }"
+            >
+              <span class="bar-knob"></span>
+            </div>
+          </div>
         </div>
-        <div class="bar-center-container">
-          <div class="bar-bg"></div>
-          <div
-            v-if="item.influence < 0"
-            class="bar bar-negative"
-            :style="{
-              width: Math.abs(item.normalized) * 50 + '%',
-              left: 50 - Math.abs(item.normalized) * 50 + '%',
-            }"
-          ></div>
-          <div
-            v-else-if="item.influence > 0"
-            class="bar bar-positive"
-            :style="{ width: item.normalized * 50 + '%', left: '50%' }"
-          >
-            <span class="bar-knob"></span>
+      </div>
+
+      <!-- Negative habits section -->
+      <div v-if="negativeInsights.length" class="habits-section negative-section">
+        <h3 class="section-title negative"><i class="pi pi-arrow-down"></i> Вредные привычки</h3>
+        <div v-for="item in negativeInsights" :key="item.habit.id" class="insight-card">
+          <div class="insight-header">
+            <span class="habit-name">{{ item.habit.name }}</span>
+            <span class="influence-value negative"> {{ item.influence.toFixed(1) }}% </span>
           </div>
-          <div v-else class="bar bar-zero" :style="{ left: '50%' }">
-            <span class="bar-knob"></span>
+          <div class="bar-center-container">
+            <div class="bar-bg"></div>
+            <div
+              class="bar bar-negative"
+              :style="{
+                width: Math.abs(item.normalized) * 50 + '%',
+                left: 50 - Math.abs(item.normalized) * 50 + '%',
+              }"
+            ></div>
+            <span
+              class="bar-knob negative-knob"
+              :style="{ left: 50 - Math.abs(item.normalized) * 50 + '%' }"
+            >
+            </span>
           </div>
-          <span
-            v-if="item.influence < 0"
-            class="bar-knob negative-knob"
-            :style="{ left: 50 - Math.abs(item.normalized) * 50 + '%' }"
-          >
-          </span>
+        </div>
+      </div>
+
+      <!-- Neutral habits section -->
+      <div v-if="neutralInsights.length" class="habits-section neutral-section">
+        <h3 class="section-title neutral"><i class="pi pi-minus"></i> Нейтральные привычки</h3>
+        <div v-for="item in neutralInsights" :key="item.habit.id" class="insight-card">
+          <div class="insight-header">
+            <span class="habit-name">{{ item.habit.name }}</span>
+            <span class="influence-value neutral"> {{ item.influence.toFixed(1) }}% </span>
+          </div>
+          <div class="bar-center-container">
+            <div class="bar-bg"></div>
+            <div class="bar bar-zero" :style="{ left: '50%' }">
+              <span class="bar-knob"></span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -127,6 +138,18 @@ const normalizedInsights = computed(() => {
 const sortedInsights = computed(() => {
   return [...normalizedInsights.value].sort((a, b) => b.influence - a.influence)
 })
+
+const positiveInsights = computed(() => {
+  return sortedInsights.value.filter((insight) => insight.influence > 0)
+})
+
+const negativeInsights = computed(() => {
+  return sortedInsights.value.filter((insight) => insight.influence < 0)
+})
+
+const neutralInsights = computed(() => {
+  return sortedInsights.value.filter((insight) => insight.influence === 0)
+})
 </script>
 
 <style scoped>
@@ -148,7 +171,34 @@ const sortedInsights = computed(() => {
   text-align: center;
   font-size: 1.4rem;
   font-weight: 700;
+  margin-bottom: 1.5rem;
+}
+
+.habits-section {
+  margin-bottom: 2rem;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
   margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.section-title.positive {
+  color: #10b981;
+}
+
+.section-title.negative {
+  color: #f97316;
+}
+
+.section-title.neutral {
+  color: #64748b;
 }
 
 .annotation {
@@ -369,6 +419,10 @@ const sortedInsights = computed(() => {
 
   .dashboard-title {
     font-size: 1.2rem;
+  }
+
+  .section-title {
+    font-size: 1rem;
   }
 
   .empty-insights {
