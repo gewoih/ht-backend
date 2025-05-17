@@ -7,19 +7,17 @@ on:
     branches: [ "master" ]
 
 jobs:
-
   build:
-
     runs-on: self-hosted
 
     steps:
     - uses: actions/checkout@v4
 
-    - name: Stop existing containers
-      run: docker compose down
-    
-    - name: Build docker images
+    - name: Pull latest code and build images
       run: docker compose build
 
-    - name: Run containers
-      run: docker compose up -d
+    - name: Recreate containers with zero downtime
+      run: docker compose up -d --remove-orphans
+
+    - name: Cleanup old images (optional)
+      run: docker image prune -f
