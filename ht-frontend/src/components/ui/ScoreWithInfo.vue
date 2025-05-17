@@ -113,6 +113,11 @@ const getScoreColor = (value: number) => {
   border-color: transparent;
 }
 
+.score-button.selected:hover {
+  color: white !important;
+  opacity: 0.9;
+}
+
 .low-score {
   background-color: #ef4444;
 }

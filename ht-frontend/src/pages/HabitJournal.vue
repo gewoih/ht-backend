@@ -245,13 +245,23 @@ watch(
               />
             </div>
 
+            <div v-if="journalStore.hasIncompleteScores" class="scores-warning">
+              <i class="pi pi-exclamation-triangle"></i>
+              <span>Пожалуйста, оцените все показатели перед сохранением</span>
+            </div>
+
             <Button
               label="Сохранить"
               icon="pi pi-save"
               @click="journalStore.saveJournal"
-              :disabled="journalStore.isSaving"
+              :disabled="journalStore.isSaving || journalStore.hasIncompleteScores"
               :loading="journalStore.isSaving"
               class="save-button"
+              v-tooltip="
+                journalStore.hasIncompleteScores
+                  ? 'Необходимо оценить все показатели'
+                  : 'Сохранить оценки и привычки'
+              "
             />
           </div>
         </div>
@@ -546,6 +556,22 @@ watch(
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 1rem;
   margin-bottom: 1.5rem;
+}
+
+.scores-warning {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  background-color: rgba(239, 68, 68, 0.1);
+  border-radius: 8px;
+  color: #ef4444;
+  font-size: 0.9rem;
+}
+
+.scores-warning i {
+  font-size: 1rem;
 }
 
 .save-button {

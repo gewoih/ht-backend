@@ -35,6 +35,10 @@ export const useJournalStore = defineStore('journal', () => {
     return format(selectedDate.value, 'yyyy-MM-dd') === getTodayString()
   })
 
+  const hasIncompleteScores = computed(() => {
+    return Object.values(dailyScore.value).some((score) => score === 0)
+  })
+
   function goToPreviousDay() {
     const newDate = addDays(selectedDate.value, -1)
     if (newDate <= new Date()) {
@@ -114,8 +118,18 @@ export const useJournalStore = defineStore('journal', () => {
   }
 
   async function saveJournal() {
+    // Prevent saving if any score is 0
+    if (hasIncompleteScores.value) {
+      hasError.value = true
+      errorMessage.value = 'Пожалуйста, заполните все оценки перед сохранением.'
+      return
+    }
+
     try {
       isSaving.value = true
+      hasError.value = false
+      errorMessage.value = null
+
       await updateJournalEntry({
         date: format(selectedDate.value, 'yyyy-MM-dd'),
         dailyScore: dailyScore.value,
@@ -143,6 +157,7 @@ export const useJournalStore = defineStore('journal', () => {
     errorMessage,
     isEditable,
     isToday,
+    hasIncompleteScores,
     goToPreviousDay,
     goToNextDay,
     loadData,
