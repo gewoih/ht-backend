@@ -23,7 +23,7 @@ public class EmailService(UserManager<User> userManager, HtContext context) : IE
 
         using var client = new SmtpClient();
 
-        await client.ConnectAsync("smtp.msndr.net", 25, MailKit.Security.SecureSocketOptions.StartTls, ct);
+        await client.ConnectAsync("smtp.msndr.net", 587, MailKit.Security.SecureSocketOptions.StartTls, ct);
         await client.AuthenticateAsync("nranenko@bk.ru", "75a5978c92dfc9b220b50c922b806c49", ct);
         await client.SendAsync(message, ct);
         await client.DisconnectAsync(true, ct);
