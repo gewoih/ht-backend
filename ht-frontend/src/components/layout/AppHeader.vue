@@ -77,19 +77,7 @@
           </Button>
         </template>
         <template v-else>
-          <Button
-            class="login-btn"
-            label="Войти"
-            icon="pi pi-sign-in"
-            text
-            @click="router.push('/login')"
-          />
-          <Button
-            class="register-btn"
-            label="Регистрация"
-            severity="primary"
-            @click="router.push('/register')"
-          />
+          <Button label="Войти в аккаунт" text @click="router.push('/login')" />
         </template>
       </div>
 
