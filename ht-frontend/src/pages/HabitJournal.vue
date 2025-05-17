@@ -207,7 +207,7 @@ watch(
                         />
                       </div>
                       <div class="habit-info">
-                        <label :for="'habit-' + habit.id" class="habit-label">
+                        <label class="habit-label">
                           {{ habit.name }}
                         </label>
                       </div>
@@ -471,6 +471,9 @@ watch(
   margin: 0;
   font-weight: 500;
   color: #333;
+  width: 100%;
+  display: inline-block;
+  padding: 0.25rem 0;
 }
 
 .habit-impact {
