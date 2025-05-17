@@ -19,13 +19,11 @@
 
         <div class="form-group">
           <label for="password">Пароль</label>
-          <Password
+          <PasswordField
             id="password"
             v-model="password"
             placeholder="Введите ваш пароль"
-            :feedback="false"
-            toggleMask
-            :class="{ 'p-invalid': v$.password.$invalid && v$.password.$dirty }"
+            :invalid="v$.password.$invalid && v$.password.$dirty"
           />
           <small v-if="v$.password.$error" class="p-error">
             {{ v$.password.$errors[0].$message }}
@@ -59,7 +57,7 @@ import { useRouter } from 'vue-router'
 import { useVuelidate } from '@vuelidate/core'
 import { required, email as emailValidator, helpers } from '@vuelidate/validators'
 import InputText from 'primevue/inputtext'
-import Password from 'primevue/password'
+import PasswordField from '../components/ui/PasswordField.vue'
 import Button from 'primevue/button'
 import Checkbox from 'primevue/checkbox'
 import { login } from '../services/auth.service'
