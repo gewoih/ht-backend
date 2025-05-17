@@ -78,18 +78,17 @@
         </template>
         <template v-else>
           <Button
-            class="register-btn"
-            label="Register"
-            icon="pi pi-user-plus"
+            class="login-btn"
+            label="Войти"
+            icon="pi pi-sign-in"
             text
-            @click="router.push('/register')"
+            @click="router.push('/login')"
           />
           <Button
-            class="login-btn"
-            label="Login"
-            icon="pi pi-sign-in"
-            outlined
-            @click="router.push('/login')"
+            class="register-btn"
+            label="Регистрация"
+            severity="primary"
+            @click="router.push('/register')"
           />
         </template>
       </div>
@@ -182,17 +181,18 @@
         <template v-else>
           <div class="mobile-auth-buttons">
             <Button
-              label="Register"
-              icon="pi pi-user-plus"
-              class="mobile-register-btn"
-              @click="navigateToMobile('/register')"
-            />
-            <Button
-              label="Login"
+              label="Войти"
               icon="pi pi-sign-in"
               outlined
               class="mobile-login-btn"
               @click="navigateToMobile('/login')"
+            />
+            <Button
+              label="Регистрация"
+              icon="pi pi-user-plus"
+              severity="primary"
+              class="mobile-register-btn"
+              @click="navigateToMobile('/register')"
             />
           </div>
         </template>
@@ -300,7 +300,7 @@ function parseJwt(token: string) {
 
 function loadUserDataFromToken() {
   if (isAuthenticated()) {
-    const token = sessionStorage.getItem('access_token')
+    const token = auth.jwtToken
     if (token) {
       const decoded = parseJwt(token)
       userName.value = decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'] || ''
@@ -344,7 +344,8 @@ const profileMenuItems = ref([
 onMounted(() => {
   // Check authentication status and update local state if needed
   if (isAuthenticated() && !auth.isLoggedIn) {
-    auth.setToken(sessionStorage.getItem('access_token') || '')
+    // This shouldn't happen, but just in case
+    auth.setToken('', false)
   } else if (!isAuthenticated() && auth.isLoggedIn) {
     auth.clearToken()
   }
@@ -356,9 +357,22 @@ onMounted(() => {
   window.addEventListener('auth:login-success', handleAuthChange)
 
   // Close analytics menu when clicking outside
-  document.addEventListener('click', (event) => {
-    if (analyticsMenuContainer.value && !analyticsMenuContainer.value.contains(event.target)) {
+  document.addEventListener('click', (event: MouseEvent) => {
+    if (
+      analyticsMenuContainer.value &&
+      !analyticsMenuContainer.value.contains(event.target as Node)
+    ) {
       showAnalyticsMenu.value = false
+    }
+
+    // Close profile menu when clicking outside
+    const target = event.target as HTMLElement
+    if (
+      showProfileMenu.value &&
+      !target.closest('.profile-btn') &&
+      !target.closest('.profile-dropdown')
+    ) {
+      showProfileMenu.value = false
     }
   })
 
@@ -380,7 +394,6 @@ onBeforeUnmount(() => {
 const handleAuthChange = () => {
   // Force the component to recognize the auth state has changed
   if (isAuthenticated()) {
-    auth.setToken(sessionStorage.getItem('access_token') || '')
     loadUserDataFromToken()
   }
 }
@@ -426,6 +439,7 @@ const handleProfileAction = (action: string) => {
       router.push('/settings')
       break
     case 'logout':
+      showProfileMenu.value = false
       logout()
       break
   }

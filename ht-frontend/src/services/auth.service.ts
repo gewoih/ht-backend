@@ -6,6 +6,7 @@ import { useAuthStore } from '../stores/authStore'
 interface LoginCredentials {
   email: string
   password: string
+  rememberMe?: boolean
 }
 
 interface RegisterCredentials {
@@ -19,7 +20,10 @@ export const login = async (credentials: LoginCredentials) => {
     const response = await http.post(API_ENDPOINTS.auth.login, credentials)
     const accessToken = response.data.accessToken
     const authStore = useAuthStore()
-    authStore.setToken(accessToken)
+
+    // Store token based on rememberMe preference
+    authStore.setToken(accessToken, credentials.rememberMe || false)
+
     return { success: true, data: response.data }
   } catch (error) {
     return { success: false, error }
@@ -84,7 +88,7 @@ export const refreshToken = async () => {
     )
     const { accessToken } = response.data
     const authStore = useAuthStore()
-    authStore.setToken(accessToken)
+    authStore.setToken(accessToken, authStore.useLocalStorage)
     return { success: true, data: response.data }
   } catch (error) {
     return { success: false, error }

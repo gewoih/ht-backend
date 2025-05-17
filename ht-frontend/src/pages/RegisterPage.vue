@@ -1,6 +1,6 @@
 <template>
   <div class="register-container">
-    <div class="register-card">
+    <div class="auth-card">
       <h2>Создание аккаунта</h2>
       <form @submit.prevent="handleSubmit">
         <div class="form-group">
@@ -74,7 +74,7 @@
           {{ errorMessage }}
         </div>
 
-        <div class="login-link">Уже есть аккаунт? <RouterLink to="/login">Войти</RouterLink></div>
+        <div class="auth-link">Уже есть аккаунт? <RouterLink to="/login">Войти</RouterLink></div>
       </form>
     </div>
   </div>
@@ -418,10 +418,10 @@ onBeforeUnmount(() => {
   padding: 2rem;
 }
 
-.register-card {
+.auth-card {
   background: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   padding: 2rem;
   width: 100%;
   max-width: 480px;
@@ -431,6 +431,8 @@ h2 {
   margin-bottom: 1.5rem;
   text-align: center;
   color: var(--primary-color);
+  font-size: 1.5rem;
+  font-weight: 600;
 }
 
 .form-group {
@@ -441,6 +443,7 @@ label {
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 500;
+  color: #333;
 }
 
 .p-inputtext,
@@ -453,6 +456,7 @@ label {
 :deep(.p-inputtext),
 :deep(.p-password-input) {
   width: 100% !important;
+  border-radius: 8px;
 }
 
 .form-actions {
@@ -461,30 +465,35 @@ label {
 
 .p-button {
   width: 100%;
+  border-radius: 8px;
 }
 
 .error-message {
   margin-top: 1rem;
-  color: var(--red-500);
+  padding: 0.75rem;
+  background-color: rgba(244, 67, 54, 0.1);
+  border-radius: 4px;
+  color: var(--red-600);
   text-align: center;
 }
 
-.login-link {
+.auth-link {
   margin-top: 1.5rem;
   text-align: center;
+  font-size: 0.95rem;
 }
 
-.login-link a {
+.auth-link a {
   color: var(--primary-color);
   text-decoration: none;
   font-weight: 500;
 }
 
-.login-link a:hover {
+.auth-link a:hover {
   text-decoration: underline;
 }
 
-/* Modern Verification dialog styles */
+/* Verification dialog styles */
 :deep(.verification-dialog) {
   max-width: 400px;
 }
@@ -492,27 +501,25 @@ label {
 :deep(.verification-dialog .p-dialog-header) {
   border-bottom: none;
   padding-bottom: 0;
-  padding-top: 1rem;
 }
 
 :deep(.verification-dialog .p-dialog-content) {
-  padding: 0 1rem 1rem;
+  padding: 0 1.5rem 1.5rem;
 }
 
 .verification-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 0.5rem 0 1rem;
   text-align: center;
 }
 
 .verification-icon {
-  font-size: 2rem;
+  font-size: 1.5rem;
   color: var(--primary-color);
-  margin-bottom: 0.75rem;
-  height: 50px;
-  width: 50px;
+  margin-bottom: 1rem;
+  height: 48px;
+  width: 48px;
   border-radius: 50%;
   background-color: rgba(var(--primary-500), 0.1);
   display: flex;
@@ -530,9 +537,8 @@ label {
 
 .verification-text {
   margin-bottom: 1.25rem;
-  color: var(--text-color-secondary);
+  color: #333;
   line-height: 1.5;
-  font-size: 0.95rem;
 }
 
 .code-input-container {
@@ -555,12 +561,6 @@ label {
   padding: 0.5rem 0;
   border-radius: 6px;
   width: 100% !important;
-  transition: all 0.2s ease;
-}
-
-.code-digit-input:focus {
-  box-shadow: 0 0 0 2px var(--primary-color-lighter);
-  border-color: var(--primary-color);
 }
 
 .verification-error {
@@ -580,7 +580,7 @@ label {
 
 .resend-code {
   font-size: 0.85rem;
-  color: var(--text-color-secondary);
+  color: #666;
 }
 
 .resend-code a {
@@ -613,7 +613,15 @@ label {
   pointer-events: none;
 }
 
-@media screen and (max-width: 480px) {
+@media (max-width: 768px) {
+  .register-container {
+    padding: 1rem;
+  }
+
+  .auth-card {
+    padding: 1.5rem;
+  }
+
   .code-digit-wrapper {
     width: 12%;
   }
@@ -621,21 +629,6 @@ label {
   .code-digit-input {
     font-size: 1rem;
     padding: 0.4rem 0;
-  }
-
-  .verification-title {
-    font-size: 1.1rem;
-  }
-
-  .verification-text {
-    font-size: 0.9rem;
-    margin-bottom: 1rem;
-  }
-
-  .verification-icon {
-    height: 40px;
-    width: 40px;
-    font-size: 1.5rem;
   }
 }
 </style>

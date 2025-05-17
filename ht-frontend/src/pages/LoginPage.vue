@@ -1,7 +1,7 @@
 <template>
   <div class="login-container">
-    <div class="login-card">
-      <h2>Sign In</h2>
+    <div class="auth-card">
+      <h2>Вход в аккаунт</h2>
       <form @submit.prevent="handleSubmit">
         <div class="form-group">
           <label for="email">Email</label>
@@ -9,7 +9,7 @@
             id="email"
             v-model="email"
             type="text"
-            placeholder="Enter your email"
+            placeholder="Введите ваш email"
             :class="{ 'p-invalid': v$.email.$invalid && v$.email.$dirty }"
           />
           <small v-if="v$.email.$error" class="p-error">
@@ -18,11 +18,11 @@
         </div>
 
         <div class="form-group">
-          <label for="password">Password</label>
+          <label for="password">Пароль</label>
           <Password
             id="password"
             v-model="password"
-            placeholder="Enter your password"
+            placeholder="Введите ваш пароль"
             :feedback="false"
             toggleMask
             :class="{ 'p-invalid': v$.password.$invalid && v$.password.$dirty }"
@@ -32,16 +32,21 @@
           </small>
         </div>
 
+        <div class="remember-me">
+          <Checkbox v-model="rememberMe" inputId="rememberMe" :binary="true" />
+          <label for="rememberMe" class="checkbox-label">Запомнить меня</label>
+        </div>
+
         <div class="form-actions">
-          <Button type="submit" label="Sign In" :loading="isLoading" :disabled="isLoading" />
+          <Button type="submit" label="Войти" :loading="isLoading" :disabled="isLoading" />
         </div>
 
         <div v-if="errorMessage" class="error-message">
           {{ errorMessage }}
         </div>
 
-        <div class="register-link">
-          Don't have an account? <RouterLink to="/register">Register</RouterLink>
+        <div class="auth-link">
+          Нет аккаунта? <RouterLink to="/register">Зарегистрироваться</RouterLink>
         </div>
       </form>
     </div>
@@ -56,6 +61,7 @@ import { required, email as emailValidator, helpers } from '@vuelidate/validator
 import InputText from 'primevue/inputtext'
 import Password from 'primevue/password'
 import Button from 'primevue/button'
+import Checkbox from 'primevue/checkbox'
 import { login } from '../services/auth.service'
 
 const router = useRouter()
@@ -63,6 +69,7 @@ const router = useRouter()
 // Form data
 const email = ref('')
 const password = ref('')
+const rememberMe = ref(false)
 const isLoading = ref(false)
 const errorMessage = ref('')
 
@@ -93,6 +100,7 @@ async function handleSubmit() {
     const response = await login({
       email: email.value,
       password: password.value,
+      rememberMe: rememberMe.value,
     })
 
     if (response.success) {
@@ -103,14 +111,14 @@ async function handleSubmit() {
       if (response.error?.response?.data?.message) {
         errorMessage.value = response.error.response.data.message
       } else if (response.error?.response?.status === 401) {
-        errorMessage.value = 'Invalid email or password. Please try again.'
+        errorMessage.value = 'Неверный email или пароль. Попробуйте еще раз.'
       } else {
-        errorMessage.value = 'Login failed. Please try again.'
+        errorMessage.value = 'Не удалось войти. Пожалуйста, попробуйте еще раз.'
       }
     }
   } catch (error) {
     // This will be hit if there's a network error or other exception
-    errorMessage.value = 'An error occurred during login. Please check your connection.'
+    errorMessage.value = 'Произошла ошибка при входе. Проверьте подключение к интернету.'
     console.error(error)
   } finally {
     isLoading.value = false
@@ -127,10 +135,10 @@ async function handleSubmit() {
   padding: 2rem;
 }
 
-.login-card {
+.auth-card {
   background: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   padding: 2rem;
   width: 100%;
   max-width: 480px;
@@ -140,6 +148,8 @@ h2 {
   margin-bottom: 1.5rem;
   text-align: center;
   color: var(--primary-color);
+  font-size: 1.5rem;
+  font-weight: 600;
 }
 
 .form-group {
@@ -150,6 +160,7 @@ label {
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 500;
+  color: #333;
 }
 
 .p-inputtext,
@@ -162,6 +173,19 @@ label {
 :deep(.p-inputtext),
 :deep(.p-password-input) {
   width: 100% !important;
+  border-radius: 8px;
+}
+
+.remember-me {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.checkbox-label {
+  margin-left: 0.5rem;
+  margin-bottom: 0;
+  cursor: pointer;
 }
 
 .form-actions {
@@ -170,26 +194,41 @@ label {
 
 .p-button {
   width: 100%;
+  border-radius: 8px;
 }
 
 .error-message {
   margin-top: 1rem;
-  color: var(--red-500);
+  padding: 0.75rem;
+  background-color: rgba(244, 67, 54, 0.1);
+  border-radius: 4px;
+  color: var(--red-600);
   text-align: center;
 }
 
-.register-link {
+.auth-link {
   margin-top: 1.5rem;
   text-align: center;
+  font-size: 0.95rem;
 }
 
-.register-link a {
+.auth-link a {
   color: var(--primary-color);
   text-decoration: none;
   font-weight: 500;
 }
 
-.register-link a:hover {
+.auth-link a:hover {
   text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .login-container {
+    padding: 1rem;
+  }
+
+  .auth-card {
+    padding: 1.5rem;
+  }
 }
 </style>

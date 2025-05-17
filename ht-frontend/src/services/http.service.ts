@@ -1,5 +1,6 @@
 import axios, { AxiosRequestConfig } from 'axios'
 import { API_ENDPOINTS } from '../config/api'
+import { useAuthStore } from '../stores/authStore'
 
 const API_BASE_URL = (import.meta as any).env.VITE_API_BASE_URL
 
@@ -14,9 +15,9 @@ const http = axios.create({
 })
 
 http.interceptors.request.use((cfg) => {
-  const t = sessionStorage.getItem('access_token')
-  if (t) cfg.headers.Authorization = `Bearer ${t}`
-  cfg.headers['X-CSRF'] = '1'
+  const authStore = useAuthStore()
+  const token = authStore.jwtToken
+  if (token) cfg.headers.Authorization = `Bearer ${token}`
   return cfg
 })
 
@@ -41,14 +42,15 @@ http.interceptors.response.use(
       }
 
       isRefreshing = true
+      const authStore = useAuthStore()
       try {
         const { data } = await axios.post(
           `${API_BASE_URL}${API_ENDPOINTS.auth.refresh}`,
           {},
-          { withCredentials: true, headers: { 'X-CSRF': '1' } }
+          { withCredentials: true }
         )
         const { accessToken } = data
-        sessionStorage.setItem('access_token', accessToken)
+        authStore.setToken(accessToken, authStore.useLocalStorage)
 
         queue.forEach((cb) => cb(accessToken))
         queue = []
@@ -57,7 +59,7 @@ http.interceptors.response.use(
         original.headers.Authorization = `Bearer ${accessToken}`
         return http(original)
       } catch (e) {
-        sessionStorage.removeItem('access_token')
+        authStore.clearToken()
         queue = []
         return Promise.reject(e)
       } finally {

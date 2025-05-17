@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { isAuthenticated } from '../services/auth.service'
 
 const authRequiredRoutes = ['HabitJournal', 'Insights', 'Leaderboard', 'Profile', 'Analytics']
 
@@ -70,9 +71,8 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const isAuthRequired = to.matched.some((record) => record.meta.requiresAuth)
-  const accessToken = sessionStorage.getItem('access_token')
 
-  if (isAuthRequired && !accessToken) {
+  if (isAuthRequired && !isAuthenticated()) {
     next({ name: 'Login' })
   } else {
     next()
