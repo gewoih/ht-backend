@@ -274,6 +274,7 @@ watch(
 </template>
 
 <style>
+/* Base container styles */
 .habit-journal {
   max-width: 800px;
   width: 100%;
@@ -281,6 +282,7 @@ watch(
   padding: 20px;
 }
 
+/* Card styles */
 .journal-card {
   margin-bottom: 1rem;
   border-radius: 12px;
@@ -288,6 +290,7 @@ watch(
   overflow: hidden;
 }
 
+/* Header styles */
 .journal-header {
   display: flex;
   align-items: center;
@@ -316,6 +319,7 @@ watch(
   font-weight: 600;
 }
 
+/* Date picker and navigation */
 .date-navigation {
   display: flex;
   align-items: center;
@@ -344,6 +348,7 @@ watch(
 .habits-settings-button {
   width: 2.5rem;
   height: 2.5rem;
+  min-width: 2.5rem;
 }
 
 /* Progress section */
@@ -405,10 +410,20 @@ watch(
 
 /* Habits list */
 .habits-list {
-  margin-top: 0.5rem;
+  margin-top: 1rem;
   max-height: 400px;
   overflow-y: auto;
   padding-right: 0.5rem;
+  scrollbar-width: thin;
+}
+
+.habits-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.habits-list::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
 }
 
 .habit-category-group {
@@ -430,6 +445,7 @@ watch(
   font-size: 0.9rem;
 }
 
+/* Habit cards */
 .habit-cards {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -446,6 +462,7 @@ watch(
   cursor: pointer;
   display: flex;
   align-items: center;
+  min-height: 60px;
 }
 
 .habit-card:hover {
@@ -512,6 +529,7 @@ watch(
   background-color: rgba(0, 0, 0, 0.05);
 }
 
+/* Empty state */
 .no-habits {
   display: flex;
   flex-direction: column;
@@ -519,11 +537,6 @@ watch(
   padding: 2rem;
   text-align: center;
   gap: 1rem;
-}
-
-.no-habits-message {
-  width: 100%;
-  max-width: 400px;
 }
 
 .add-habits-button {
@@ -614,24 +627,32 @@ watch(
 @media (max-width: 768px) {
   .habit-journal {
     padding: 10px;
+    margin: 10px auto;
   }
 
   .journal-header {
     flex-direction: column;
     align-items: flex-start;
+    padding: 0.5rem;
   }
 
   .journal-header-right {
     width: 100%;
     justify-content: space-between;
+    margin-top: 0.5rem;
   }
 
   .date-navigation {
     width: calc(100% - 3rem);
+    flex: 1;
   }
 
   .date-picker {
     width: 100%;
+  }
+
+  .date-picker :deep(.p-inputtext) {
+    font-size: 0.85rem;
   }
 
   .habit-cards {
@@ -640,6 +661,62 @@ watch(
 
   .scores-grid {
     grid-template-columns: 1fr;
+  }
+
+  .progress-section {
+    padding: 0.75rem;
+  }
+
+  .habit-card {
+    padding: 0.75rem;
+    min-height: 50px;
+  }
+
+  .scores-container {
+    padding: 1rem;
+  }
+
+  .progress-info {
+    font-size: 0.9rem;
+  }
+
+  .impact-progress {
+    height: 20px !important;
+    font-size: 0.9rem;
+  }
+
+  .p-progressbar .p-progressbar-value {
+    font-size: 0.9rem;
+  }
+}
+
+/* Small mobile devices */
+@media (max-width: 480px) {
+  .habit-journal {
+    padding: 5px;
+  }
+
+  .journal-title {
+    font-size: 1.1rem;
+  }
+
+  .habit-category-label {
+    font-size: 1rem;
+  }
+
+  .scores-title {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+  }
+
+  .habit-impact {
+    min-width: 35px;
+    font-size: 0.8rem;
+  }
+
+  .loading-container,
+  .error-container {
+    padding: 2rem 1rem;
   }
 }
 </style>

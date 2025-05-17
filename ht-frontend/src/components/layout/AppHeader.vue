@@ -325,7 +325,6 @@ function getUserInitial(username: string): string {
 const showProfileMenu = ref(false)
 const profileMenuItems = ref([
   { label: 'Мой профиль', icon: 'pi pi-user', action: 'profile' },
-  { label: 'Настройки', icon: 'pi pi-cog', action: 'settings' },
   { label: 'Выйти', icon: 'pi pi-sign-out', action: 'logout' },
 ])
 
