@@ -104,7 +104,6 @@ const getScoreColor = (value: number) => {
 }
 
 .score-button:hover {
-  background-color: #f5f5f5;
   border-color: #ccc;
 }
 
