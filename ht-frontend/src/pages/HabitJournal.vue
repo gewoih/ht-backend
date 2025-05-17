@@ -444,6 +444,8 @@ watch(
   transition: all 0.2s ease;
   border: 1px solid #f1f1f1;
   cursor: pointer;
+  display: flex;
+  align-items: center;
 }
 
 .habit-card:hover {
@@ -459,11 +461,21 @@ watch(
 .habit-card-content {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 0.8rem;
+  width: 100%;
+}
+
+.habit-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .habit-info {
   flex: 1;
+  display: flex;
+  align-items: center;
 }
 
 .habit-label {
