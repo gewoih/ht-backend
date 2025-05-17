@@ -14,11 +14,12 @@ public class LeaderboardService(ICurrentUserService currentUserService, HtContex
             .Select(group => new
             {
                 UserId = group.Key,
-                Score = group.Sum(journalLog => journalLog.HabitLogs.Sum(habitLog => habitLog.Habit.Impact))
+                Score = group.Sum(journalLog =>
+                    journalLog.HabitLogs.Where(habitLog => habitLog.Value).Sum(habitLog => habitLog.Habit.Impact))
             })
             .OrderByDescending(group => group.Score)
             .ToDictionaryAsync(key => key.UserId, value => value.Score);
-    
+
         var userIds = userScores.Keys.ToList();
         var currentUserId = currentUserService.GetUserId();
         var currentUserProfile = await currentUserService.GetUserProfileAsync();
@@ -31,9 +32,7 @@ public class LeaderboardService(ICurrentUserService currentUserService, HtContex
         foreach (var ((userId, userScore), index) in userScores.Select((pair, i) => (pair, i)))
         {
             if (!usernames.TryGetValue(userId, out var username))
-            {
-                username = "Test user " + index;
-            }
+                continue;
 
             rankedUsers.Add(new LeaderboardUserDto(userId, username!, userScore, index + 1));
         }
