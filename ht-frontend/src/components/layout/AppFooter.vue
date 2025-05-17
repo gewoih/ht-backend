@@ -35,6 +35,7 @@
   font-size: 1rem;
   color: #2c3e50;
 }
+
 .footer-content {
   max-width: 1200px;
   margin: 0 auto;
@@ -45,62 +46,121 @@
   gap: 2rem;
   padding: 0 1rem;
 }
+
 .footer-brand {
   display: flex;
   align-items: center;
   gap: 0.75rem;
 }
+
 .footer-logo {
   width: 36px;
   height: 36px;
 }
+
 .footer-title {
   font-weight: 700;
   font-size: 1.2rem;
   color: #4caf50;
 }
+
 .footer-nav {
   display: flex;
   gap: 1.5rem;
 }
+
 .footer-link {
   color: #2c3e50;
   text-decoration: none;
   transition: color 0.2s;
+  padding: 0.5rem 0;
+  display: inline-block;
 }
+
 .footer-link:hover {
   color: #4caf50;
 }
+
 .footer-social {
   display: flex;
   gap: 1rem;
 }
+
 .footer-social-link {
   color: #2c3e50;
   font-size: 1.3rem;
-  transition: color 0.2s;
+  transition: all 0.2s;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
 }
+
 .footer-social-link:hover {
   color: #4caf50;
+  background-color: rgba(76, 175, 80, 0.1);
 }
+
 .footer-bottom {
   text-align: center;
   margin-top: 1.5rem;
   color: #888;
   font-size: 0.95rem;
+  padding: 0 1rem;
 }
+
 @media (max-width: 768px) {
+  .app-footer {
+    padding-top: 1.5rem;
+    margin-top: 2rem;
+  }
+
   .footer-content {
     flex-direction: column;
     gap: 1.5rem;
     text-align: center;
+    padding: 0 1.5rem;
   }
+}
+
+@media (max-width: 480px) {
+  .app-footer {
+    padding-top: 1.25rem;
+    padding-bottom: 1rem;
+  }
+
+  .footer-content {
+    gap: 1.25rem;
+  }
+
   .footer-nav {
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-  .footer-social {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    width: 100%;
+    gap: 0.5rem 1rem;
     justify-content: center;
+  }
+
+  .footer-link {
+    padding: 0.75rem 0;
+    font-size: 0.95rem;
+  }
+
+  .footer-social {
+    width: 100%;
+    justify-content: center;
+    gap: 1.5rem;
+  }
+
+  .footer-social-link {
+    font-size: 1.5rem;
+  }
+
+  .footer-bottom {
+    font-size: 0.85rem;
+    margin-top: 1.25rem;
   }
 }
 </style>
