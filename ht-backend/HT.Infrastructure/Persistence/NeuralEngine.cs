@@ -1,134 +1,80 @@
-using HT.Application.Dto;
 using Microsoft.ML;
 using Microsoft.ML.Data;
-using Microsoft.ML.Trainers;
+using HT.Application.Dto;
 
 namespace HT.Infrastructure.Persistence;
 
-public class NeuralEngine
+public sealed class NeuralEngine
 {
-    private const int Window = 7;
-    private const float L2 = 0.1f;
+    private readonly MLContext _ml = new(seed: 228);
 
-    public Dictionary<Guid, double> GetHabitsImportance(List<JournalLogDto> journalLogs)
+    public Dictionary<Guid, double> GetHabitsImportance(IReadOnlyCollection<JournalLogDto> logs)
     {
-        var habitIds = GetHabitIds(journalLogs);
-        var avgScore = (float)journalLogs.Average(journalLogDto => journalLogDto.DailyScore.Total);
+        if (logs is null) throw new ArgumentNullException(nameof(logs));
+        if (logs.Count == 0) return new Dictionary<Guid, double>();
 
-        var rows = BuildRows(journalLogs, habitIds, avgScore);
-        var mlContext = new MLContext(seed: 228);
+        /*---------- подготовка данных ----------*/
+        var habitIds = GetHabitIds(logs);
+        var id2Index = habitIds
+            .Select((id, idx) => (id, idx))
+            .ToDictionary(t => t.id, t => t.idx);
 
-        var schemaDefinition = SchemaDefinition.Create(typeof(HabitData));
-        schemaDefinition["Features"].ColumnType = new VectorDataViewType(NumberDataViewType.Single, habitIds.Count * 3);
-        var dataView = mlContext.Data.LoadFromEnumerable(rows, schemaDefinition);
-        var model = TrainModel(mlContext, dataView);
+        var rows = BuildRows(logs, habitIds.Count, id2Index);
 
-        return ExtractWeights(model, habitIds);
-    }
+        var schema = SchemaDefinition.Create(typeof(HabitData));
+        schema[nameof(HabitData.Features)]
+            .ColumnType = new VectorDataViewType(NumberDataViewType.Single, habitIds.Count);
 
-    private static Dictionary<Guid, double> ExtractWeights(
-        RegressionPredictionTransformer<LinearRegressionModelParameters> model,
-        List<Guid> habitIds)
-    {
-        var coeffs = model.Model.Weights.ToArray();
-        var dict = new Dictionary<Guid, double>(habitIds.Count);
+        var data = _ml.Data.LoadFromEnumerable(rows, schema);
+
+        /*---------- обучение модели ----------*/
+        var pipeline = _ml
+            .Transforms.NormalizeMeanVariance(nameof(HabitData.Features))
+            .Append(_ml.Regression.Trainers.Sdca(
+                labelColumnName: nameof(HabitData.Label),
+                featureColumnName: nameof(HabitData.Features),
+                l2Regularization: 0.1f,
+                maximumNumberOfIterations: 1_000));
+
+        var model = pipeline.Fit(data);
+
+        /*---------- извлечение и нормализация весов ----------*/
+        var weights = model.LastTransformer.Model.Weights.ToArray();
+        var totalAbs = weights.Select(Math.Abs).Sum();
+
+        var importance = new Dictionary<Guid, double>(habitIds.Count);
         for (var i = 0; i < habitIds.Count; i++)
-            dict[habitIds[i]] = coeffs[i];
-
-        return dict;
-    }
-
-    private static RegressionPredictionTransformer<LinearRegressionModelParameters> TrainModel(MLContext ml,
-        IDataView dataView)
-    {
-        var opt = new SdcaRegressionTrainer.Options
         {
-            LabelColumnName = nameof(HabitData.Label),
-            FeatureColumnName = nameof(HabitData.Features),
-            MaximumNumberOfIterations = 1000,
-            Shuffle = true,
-            NumberOfThreads = 1,
-            L2Regularization = L2
-        };
+            var percent = totalAbs == 0 ? 0 : Math.Round(weights[i] / totalAbs * 100.0, 2);
+            importance[habitIds[i]] = percent;
+        }
 
-        return ml.Regression.Trainers.Sdca(opt).Fit(dataView);
+        return importance;
     }
 
     private static List<Guid> GetHabitIds(IEnumerable<JournalLogDto> logs) =>
         logs.SelectMany(j => j.HabitLogs)
             .Select(h => h.HabitId)
             .Distinct()
-            .OrderBy(id => id.ToString())
+            .OrderBy(id => id)
             .ToList();
 
-    private List<HabitData> BuildRows(
-        List<JournalLogDto> journalLogDtos,
-        List<Guid> habitIds,
-        float avgScore)
+    private static IEnumerable<HabitData> BuildRows(
+        IEnumerable<JournalLogDto> logs,
+        int featureCount,
+        Dictionary<Guid, int> id2Index)
     {
-        var ordered = journalLogDtos.OrderBy(journalLogDto => journalLogDto.Date).ToList();
-
-        // вспомогательные буферы для Sum7 и Streak
-        var rolling = habitIds.ToDictionary(id => id, _ => new Queue<int>(7));
-        var streaks = habitIds.ToDictionary(id => id, _ => 0);
-
-        var rows = new List<HabitData>();
-
-        for (var d = 0; d < ordered.Count; d++)
+        foreach (var log in logs.OrderBy(l => l.Date))
         {
-            var features = ComposeFeatureVector(
-                ordered[d], habitIds, rolling, streaks);
+            var features = new float[featureCount];
+            foreach (var hl in log.HabitLogs)
+                features[id2Index[hl.HabitId]] = hl.Value ? 1f : -1f;
 
-            if (d < Window - 1)
-                continue;
-
-            rows.Add(new HabitData
+            yield return new HabitData
             {
                 Features = features,
-                Label = ordered[d].DailyScore.Total - avgScore
-            });
+                Label = log.DailyScore.Total
+            };
         }
-
-        return rows;
-    }
-
-    private static float[] ComposeFeatureVector(
-        JournalLogDto log,
-        IList<Guid> habitIds,
-        IDictionary<Guid, Queue<int>> rolling,
-        IDictionary<Guid, int> streaks)
-    {
-        var habitsCount = habitIds.Count;
-        var today = new float[habitsCount];
-        var sum7 = new float[habitsCount];
-        var streak = new float[habitsCount];
-
-        foreach (var habitLog in log.HabitLogs)
-        {
-            var idx = habitIds.IndexOf(habitLog.HabitId);
-            var on = habitLog.Value ? 1 : -1;
-            today[idx] = on;
-
-            // Sum7
-            var q = rolling[habitLog.HabitId];
-            q.Enqueue(habitLog.Value ? 1 : 0);
-            if (q.Count > Window) q.Dequeue();
-
-            // Streak
-            streaks[habitLog.HabitId] = habitLog.Value ? streaks[habitLog.HabitId] + 1 : 0;
-        }
-
-        for (var i = 0; i < habitsCount; i++)
-        {
-            var id = habitIds[i];
-            sum7[i] = rolling[id].Sum();
-            streak[i] = streaks[id];
-        }
-
-        var full = new float[habitsCount * 3];
-        Buffer.BlockCopy(today, 0, full, 0, habitsCount * 4);
-        Buffer.BlockCopy(sum7, 0, full, habitsCount * 4, habitsCount * 4);
-        Buffer.BlockCopy(streak, 0, full, habitsCount * 8, habitsCount * 4);
-        return full;
     }
 }

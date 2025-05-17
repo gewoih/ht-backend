@@ -43,6 +43,7 @@ public sealed class UserJournalService(HtContext context, ICurrentUserService cu
     public async Task<List<JournalLogDto>> GetAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         return await context.JournalLogs
+            .Include(journalLog => journalLog.HabitLogs)
             .Where(journalLog => journalLog.UserId == userId)
             .Select(journalLog => journalLog.ToDto())
             .ToListAsync(cancellationToken: cancellationToken);

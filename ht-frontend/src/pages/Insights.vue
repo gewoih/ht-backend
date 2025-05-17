@@ -1,7 +1,13 @@
 <template>
   <div class="insights-dashboard">
-    <div v-if="loading" class="loading">Загрузка...</div>
-    <div v-else-if="error" class="error">Ошибка: {{ error }}</div>
+    <div v-if="loading" class="loading">
+      <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+      <div>Загрузка...</div>
+    </div>
+    <div v-else-if="error" class="error">
+      <i class="pi pi-exclamation-triangle" style="font-size: 2rem; color: #ef4444"></i>
+      <div>{{ error }}</div>
+    </div>
     <div v-else-if="!insights.length" class="empty-insights">
       <div class="empty-message">
         <i class="pi pi-chart-bar empty-icon"></i>
@@ -13,47 +19,35 @@
         <Button
           label="Заполнить дневник"
           icon="pi pi-pencil"
-          class="fill-journal-button"
+          class="fill-journal-button p-button-primary"
           @click="$router.push('/journal')"
         />
       </div>
     </div>
-    <div v-else>
-      <h2 class="dashboard-title">Влияние ваших привычек (%)</h2>
+    <div v-else class="insights-content">
+      <h2 class="dashboard-title">Влияние ваших привычек</h2>
       <div class="annotation">
-        <span class="icon-hurt">
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 18 18"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path d="M9 15L3 6H15L9 15Z" fill="#ffb300" />
-          </svg>
-          <span class="icon-label hurt-label">Вредит</span>
+        <span class="annotation-item negative">
+          <div class="indicator negative"></div>
+          <span class="icon-label">Вредит</span>
         </span>
-        <span class="icon-help">
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 18 18"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path d="M9 3L15 12H3L9 3Z" fill="#22c55e" />
-          </svg>
-          <span class="icon-label help-label">Помогает</span>
+        <span class="annotation-item positive">
+          <div class="indicator positive"></div>
+          <span class="icon-label">Помогает</span>
         </span>
       </div>
-      <div v-for="item in normalizedInsights" :key="item.habit.id" class="insight-card">
+      <div v-for="item in sortedInsights" :key="item.habit.id" class="insight-card">
         <div class="insight-header">
-          <span class="habit-name">{{ item.habit.name.toUpperCase() }}</span>
+          <span class="habit-name">{{ item.habit.name }}</span>
           <span
             class="influence-value"
-            :class="{ positive: item.influence > 0, negative: item.influence < 0 }"
+            :class="{
+              positive: item.influence > 0,
+              negative: item.influence < 0,
+              neutral: item.influence === 0,
+            }"
           >
-            {{ item.influence > 0 ? '+' : '' }}{{ item.influence.toFixed(0) }}%
+            {{ item.influence > 0 ? '+' : '' }}{{ item.influence.toFixed(1) }}%
           </span>
         </div>
         <div class="bar-center-container">
@@ -65,9 +59,7 @@
               width: Math.abs(item.normalized) * 50 + '%',
               left: 50 - Math.abs(item.normalized) * 50 + '%',
             }"
-          >
-            <span class="bar-knob"></span>
-          </div>
+          ></div>
           <div
             v-else-if="item.influence > 0"
             class="bar bar-positive"
@@ -78,6 +70,12 @@
           <div v-else class="bar bar-zero" :style="{ left: '50%' }">
             <span class="bar-knob"></span>
           </div>
+          <span
+            v-if="item.influence < 0"
+            class="bar-knob negative-knob"
+            :style="{ left: 50 - Math.abs(item.normalized) * 50 + '%' }"
+          >
+          </span>
         </div>
       </div>
     </div>
@@ -125,142 +123,193 @@ const normalizedInsights = computed(() => {
     normalized: i.influence / maxAbs,
   }))
 })
+
+const sortedInsights = computed(() => {
+  return [...normalizedInsights.value].sort((a, b) => b.influence - a.influence)
+})
 </script>
 
 <style scoped>
 .insights-dashboard {
-  max-width: 600px;
+  max-width: 650px;
   margin: 2rem auto;
-  padding: 1rem;
+  padding: 1.5rem;
   background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
 }
+
+.insights-content {
+  animation: fadeIn 0.5s ease-out;
+}
+
 .dashboard-title {
-  color: #222;
+  color: #1e293b;
   text-align: center;
-  font-size: 1.2rem;
+  font-size: 1.4rem;
   font-weight: 700;
-  letter-spacing: 0.1em;
-  margin-bottom: 0.5rem;
+  margin-bottom: 1rem;
 }
+
 .annotation {
   display: flex;
   justify-content: center;
-  gap: 2.5rem;
-  align-items: flex-end;
-  margin-bottom: 1.5rem;
-}
-.icon-help,
-.icon-hurt {
-  display: flex;
-  flex-direction: column;
+  gap: 3rem;
   align-items: center;
-  font-size: 0.8rem;
+  margin-bottom: 2rem;
 }
+
+.annotation-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.indicator {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+}
+
+.indicator.positive {
+  background-color: #10b981;
+}
+
+.indicator.negative {
+  background-color: #f97316;
+}
+
 .icon-label {
-  margin-top: 0.1rem;
-  font-size: 0.8rem;
-  color: #888;
-  letter-spacing: 0.04em;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #64748b;
 }
-.help-label {
-  color: #22c55e;
-}
-.hurt-label {
-  color: #ffb300;
-}
+
 .insight-card {
-  background: #f8f9fa;
-  border-radius: 10px;
-  padding: 1rem 1.2rem 0.7rem 1.2rem;
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 1.2rem 1.5rem 1rem;
   margin-bottom: 1.2rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  transition: transform 0.2s, box-shadow 0.2s;
 }
+
+.insight-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
 .insight-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.8rem;
 }
+
 .habit-name {
-  color: #222;
-  font-size: 0.95rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  color: #1e293b;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
 }
+
 .influence-value {
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   font-weight: 700;
-  min-width: 48px;
+  min-width: 54px;
   text-align: right;
+  border-radius: 6px;
+  padding: 0.2rem 0.5rem;
 }
+
 .influence-value.positive {
-  color: #22c55e;
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
 }
+
 .influence-value.negative {
-  color: #ffb300;
+  color: #f97316;
+  background: rgba(249, 115, 22, 0.1);
 }
+
+.influence-value.neutral {
+  color: #64748b;
+  background: rgba(100, 116, 139, 0.1);
+}
+
 .bar-center-container {
   position: relative;
   background: transparent;
-  border-radius: 4px;
-  height: 8px;
-  margin: 0.5rem 0 0.2rem 0;
+  border-radius: 6px;
+  height: 10px;
+  margin: 0.8rem 0 0.4rem 0;
 }
+
 .bar-bg {
   position: absolute;
   left: 0;
   right: 0;
   top: 0;
   bottom: 0;
-  background: repeating-linear-gradient(
-    90deg,
-    #e9ecef 0 4px,
-    #e9ecef 8px,
-    #f8f9fa 8px,
-    #f8f9fa 12px
-  );
-  border-radius: 4px;
+  background: #e2e8f0;
+  border-radius: 6px;
   opacity: 1;
   z-index: 0;
 }
+
 .bar {
   position: absolute;
   top: 0;
   height: 100%;
-  border-radius: 4px;
+  border-radius: 6px;
   z-index: 2;
   display: flex;
   align-items: center;
-  transition: width 0.3s, left 0.3s;
+  transition: width 0.5s ease-out, left 0.5s ease-out;
 }
+
 .bar-positive {
-  background: #22c55e;
+  background: linear-gradient(90deg, #10b981, #34d399);
 }
+
 .bar-negative {
-  background: #ffb300;
+  background: linear-gradient(270deg, #f97316, #fb923c);
 }
+
 .bar-zero {
-  background: #bbb;
-  width: 2px;
+  background: #94a3b8;
+  width: 3px;
 }
+
 .bar-knob {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   background: #fff;
-  border: 3px solid #e9ecef;
+  border: 3px solid #cbd5e1;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   margin-left: auto;
-  margin-right: -8px;
+  margin-right: -9px;
   z-index: 3;
 }
+
+.negative-knob {
+  position: absolute;
+  top: -4px;
+  transform: translateX(-50%);
+  margin: 0;
+}
+
 .loading,
 .error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
   text-align: center;
-  margin: 2rem 0;
+  margin: 3rem 0;
+  color: #64748b;
 }
 
 .empty-insights {
@@ -279,20 +328,20 @@ const normalizedInsights = computed(() => {
 }
 
 .empty-icon {
-  font-size: 3rem;
-  color: #ccc;
+  font-size: 3.5rem;
+  color: #cbd5e1;
   margin-bottom: 0.5rem;
 }
 
 .empty-message h3 {
   font-size: 1.5rem;
-  color: #333;
+  color: #1e293b;
   margin: 0;
 }
 
 .empty-message p {
-  color: #666;
-  line-height: 1.5;
+  color: #64748b;
+  line-height: 1.6;
   margin-bottom: 1rem;
 }
 
@@ -300,7 +349,28 @@ const normalizedInsights = computed(() => {
   margin-top: 1rem;
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @media (max-width: 480px) {
+  .insights-dashboard {
+    margin: 1rem auto;
+    padding: 1.2rem;
+    border-radius: 12px;
+  }
+
+  .dashboard-title {
+    font-size: 1.2rem;
+  }
+
   .empty-insights {
     padding: 2rem 1rem;
   }
@@ -311,6 +381,10 @@ const normalizedInsights = computed(() => {
 
   .empty-message p {
     font-size: 0.9rem;
+  }
+
+  .insight-card {
+    padding: 1rem 1.2rem 0.8rem;
   }
 }
 </style>

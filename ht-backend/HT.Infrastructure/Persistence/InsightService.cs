@@ -19,7 +19,6 @@ public class InsightService(
 
         var insights = importanceMap
             .Select(kvp => new InsightDto(habits.First(habit => habit.Id == kvp.Key), kvp.Value))
-            .OrderByDescending(insight => insight.Influence)
             .ToList();
 
         return insights;
@@ -29,14 +28,6 @@ public class InsightService(
     {
         var filteredHabitLogs = journalLogs
             .SelectMany(j => j.HabitLogs)
-            .GroupBy(h => h.HabitId)
-            .Where(group =>
-            {
-                var zeroCount = group.Count(h => h.Value == false);
-                var nonZeroCount = group.Count(h => h.Value);
-                return zeroCount >= 5 && nonZeroCount >= 5;
-            })
-            .SelectMany(g => g)
             .ToList();
 
         var allowedHabitIds = filteredHabitLogs
