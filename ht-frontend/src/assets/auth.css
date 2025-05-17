@@ -1,0 +1,244 @@
+/* Auth components shared styles */
+
+/* Container and card layout */
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+  padding: var(--spacing-xl);
+}
+
+.auth-card {
+  background: white;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--box-shadow-md);
+  padding: var(--spacing-xl);
+  width: 100%;
+  max-width: 480px;
+}
+
+/* Typography */
+.auth-card h2 {
+  margin-bottom: var(--spacing-lg);
+  text-align: center;
+  color: var(--primary-color);
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+/* Form elements */
+.form-group {
+  margin-bottom: var(--spacing-lg);
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: var(--spacing-xs);
+  font-weight: 500;
+  color: #333;
+}
+
+.form-actions {
+  margin-top: var(--spacing-lg);
+}
+
+/* Input fields */
+.p-inputtext,
+.p-password {
+  width: 100%;
+}
+
+:deep(.p-password),
+:deep(.p-inputtext),
+:deep(.p-password-input) {
+  width: 100% !important;
+  border-radius: var(--border-radius-md);
+}
+
+/* Remember me checkbox */
+.remember-me {
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+}
+
+.checkbox-label {
+  margin-left: var(--spacing-xs);
+  margin-bottom: 0;
+  cursor: pointer;
+}
+
+/* Button styles */
+.auth-container .p-button {
+  width: 100%;
+  border-radius: var(--border-radius-md);
+}
+
+/* Error message */
+.error-message {
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-sm);
+  background-color: var(--color-error-bg);
+  border-radius: var(--border-radius-sm);
+  color: var(--color-error);
+  text-align: center;
+}
+
+/* Auth links */
+.auth-link {
+  margin-top: var(--spacing-lg);
+  text-align: center;
+  font-size: 0.95rem;
+}
+
+.auth-link a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.auth-link a:hover {
+  text-decoration: underline;
+}
+
+/* Email verification dialog */
+.verification-dialog {
+  max-width: 400px;
+}
+
+:deep(.verification-dialog .p-dialog-header) {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+:deep(.verification-dialog .p-dialog-content) {
+  padding: 0 var(--spacing-lg) var(--spacing-lg);
+}
+
+.verification-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.verification-icon {
+  font-size: 1.5rem;
+  color: var(--primary-color);
+  margin-bottom: var(--spacing-md);
+  height: 48px;
+  width: 48px;
+  border-radius: 50%;
+  background-color: rgba(var(--primary-500), 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.verification-title {
+  margin-top: 0;
+  margin-bottom: var(--spacing-sm);
+  color: var(--primary-color);
+  font-weight: 600;
+  font-size: 1.25rem;
+}
+
+.verification-text {
+  margin-bottom: var(--spacing-md);
+  color: var(--color-text);
+  line-height: 1.5;
+}
+
+/* Code verification input */
+.code-input-container {
+  display: flex;
+  gap: 6px;
+  margin-bottom: var(--spacing-md);
+  width: 100%;
+  justify-content: center;
+}
+
+.code-digit-wrapper {
+  width: 14%;
+  max-width: 40px;
+}
+
+.code-digit-input {
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 600;
+  padding: var(--spacing-xs) 0;
+  border-radius: var(--border-radius-sm);
+  width: 100% !important;
+}
+
+.verification-error {
+  margin-bottom: var(--spacing-md);
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.verification-actions {
+  width: 100%;
+  margin-bottom: var(--spacing-md);
+}
+
+.verify-button {
+  min-width: 120px;
+}
+
+.resend-code {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.resend-code a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.resend-code a:hover {
+  text-decoration: underline;
+}
+
+.sending-code-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: var(--primary-color);
+  font-size: 0.9rem;
+  margin-bottom: var(--spacing-md);
+}
+
+.sending-code-indicator .pi {
+  font-size: 1rem;
+}
+
+.resend-code a.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .auth-container {
+    padding: var(--spacing-md);
+  }
+
+  .auth-card {
+    padding: var(--spacing-lg);
+  }
+
+  .code-digit-wrapper {
+    width: 12%;
+  }
+
+  .code-digit-input {
+    font-size: 1rem;
+    padding: 0.4rem 0;
+  }
+}

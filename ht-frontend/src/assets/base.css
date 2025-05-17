@@ -4,6 +4,28 @@
   --color-text: #222;
   --primary-color: #1976d2;
   --primary-hover: #1565c0;
+
+  /* Add additional colors used across the app */
+  --color-error: #ef4444;
+  --color-error-bg: rgba(244, 67, 54, 0.1);
+  --color-success: #22c55e;
+  --color-success-bg: rgba(34, 197, 94, 0.1);
+  --color-warning: #f59e0b;
+  --color-warning-bg: rgba(245, 158, 11, 0.1);
+
+  /* Border and shadow values */
+  --border-radius-sm: 4px;
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+  --box-shadow-sm: 0 2px 5px rgba(0, 0, 0, 0.05);
+  --box-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+  /* Spacing */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 0.75rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
 }
 
 *,

@@ -1,4 +1,5 @@
 @import './base.css';
+@import './auth.css';
 
 html,
 body {
@@ -51,17 +52,7 @@ a,
   }
 }
 
-@media (min-width: 1024px) {
-  body {
-    display: flex;
-    place-items: center;
-  }
-
-  #app {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-  }
-}
+/* Removed conflicting media query that affects all pages */
 
 /* Кастомные стили для PrimeVue */
 .p-component {
