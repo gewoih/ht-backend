@@ -1,35 +1,51 @@
 <template>
   <div class="insights-dashboard">
-    <h2 class="dashboard-title">Влияние ваших привычек (%)</h2>
-    <div class="annotation">
-      <span class="icon-hurt">
-        <svg
-          width="18"
-          height="18"
-          viewBox="0 0 18 18"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path d="M9 15L3 6H15L9 15Z" fill="#ffb300" />
-        </svg>
-        <span class="icon-label hurt-label">Вредит</span>
-      </span>
-      <span class="icon-help">
-        <svg
-          width="18"
-          height="18"
-          viewBox="0 0 18 18"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path d="M9 3L15 12H3L9 3Z" fill="#22c55e" />
-        </svg>
-        <span class="icon-label help-label">Помогает</span>
-      </span>
-    </div>
     <div v-if="loading" class="loading">Загрузка...</div>
     <div v-else-if="error" class="error">Ошибка: {{ error }}</div>
+    <div v-else-if="!insights.length" class="empty-insights">
+      <div class="empty-message">
+        <i class="pi pi-chart-bar empty-icon"></i>
+        <h3>Аналитика скоро появится</h3>
+        <p>
+          Продолжайте заполнять дневник привычек, чтобы получить персональные инсайты о влиянии
+          привычек на ваше самочувствие
+        </p>
+        <Button
+          label="Заполнить дневник"
+          icon="pi pi-pencil"
+          class="fill-journal-button"
+          @click="$router.push('/journal')"
+        />
+      </div>
+    </div>
     <div v-else>
+      <h2 class="dashboard-title">Влияние ваших привычек (%)</h2>
+      <div class="annotation">
+        <span class="icon-hurt">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 18 18"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path d="M9 15L3 6H15L9 15Z" fill="#ffb300" />
+          </svg>
+          <span class="icon-label hurt-label">Вредит</span>
+        </span>
+        <span class="icon-help">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 18 18"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path d="M9 3L15 12H3L9 3Z" fill="#22c55e" />
+          </svg>
+          <span class="icon-label help-label">Помогает</span>
+        </span>
+      </div>
       <div v-for="item in normalizedInsights" :key="item.habit.id" class="insight-card">
         <div class="insight-header">
           <span class="habit-name">{{ item.habit.name.toUpperCase() }}</span>
@@ -71,6 +87,8 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { fetchInsights } from '../services/insights.service'
+import Button from 'primevue/button'
+import { useRouter } from 'vue-router'
 
 interface Habit {
   id: string
@@ -81,6 +99,8 @@ interface Insight {
   habit: Habit
   influence: number
 }
+
+const router = useRouter()
 
 const insights = ref<Insight[]>([])
 const loading = ref(true)
@@ -241,5 +261,56 @@ const normalizedInsights = computed(() => {
 .error {
   text-align: center;
   margin: 2rem 0;
+}
+
+.empty-insights {
+  padding: 3rem 1.5rem;
+  text-align: center;
+}
+
+.empty-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  max-width: 450px;
+  margin: 0 auto;
+}
+
+.empty-icon {
+  font-size: 3rem;
+  color: #ccc;
+  margin-bottom: 0.5rem;
+}
+
+.empty-message h3 {
+  font-size: 1.5rem;
+  color: #333;
+  margin: 0;
+}
+
+.empty-message p {
+  color: #666;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+}
+
+.fill-journal-button {
+  margin-top: 1rem;
+}
+
+@media (max-width: 480px) {
+  .empty-insights {
+    padding: 2rem 1rem;
+  }
+
+  .empty-message h3 {
+    font-size: 1.3rem;
+  }
+
+  .empty-message p {
+    font-size: 0.9rem;
+  }
 }
 </style>
