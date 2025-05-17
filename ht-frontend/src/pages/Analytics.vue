@@ -18,7 +18,6 @@ const analyticsData = ref<AnalyticsData>([])
 const loading = ref(true)
 const error = ref<string | null>(null)
 let chart: Chart | null = null
-const chartType = ref<'bar' | 'line'>('bar')
 
 const dateRangeOptions = [
   { label: 'Текущая неделя', value: 'week' },
@@ -233,7 +232,158 @@ function isChartContainerReady(): boolean {
   return width > 0 && height > 0
 }
 
-// Update the renderChart function to check container dimensions
+function formatDateLabel(dateString: string): string {
+  const date = new Date(dateString)
+  return new Intl.DateTimeFormat('ru-RU', {
+    day: 'numeric',
+    month: selectedDateRange.value === 'year' ? 'short' : 'long',
+  }).format(date)
+}
+
+function getChartData() {
+  const sorted = [...analyticsData.value].sort(
+    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+  )
+
+  // Calculate the combined score for each day (average of all metrics)
+  return {
+    labels: sorted.map((d) => formatDateLabel(d.date)),
+    datasets: [
+      {
+        type: 'line' as const,
+        label: 'Общий показатель',
+        backgroundColor: 'rgba(33, 150, 243, 0.2)' as string | CanvasGradient,
+        borderColor: 'rgba(33, 150, 243, 0.9)',
+        borderWidth: 2,
+        data: sorted.map((d) => {
+          // Calculate average of all scores for this day
+          return Number(
+            (
+              (d.score.health +
+                d.score.energy +
+                d.score.mood +
+                d.score.sleep +
+                d.score.calmness +
+                d.score.satisfaction) /
+              6
+            ).toFixed(2)
+          )
+        }),
+        fill: true,
+        tension: 0.4,
+        pointBackgroundColor: 'rgba(33, 150, 243, 1)',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2,
+        pointRadius: 5,
+        pointHoverRadius: 7,
+      },
+    ],
+  }
+}
+
+// Chart options
+const chartOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  animation: {
+    duration: 1000,
+    easing: 'easeOutQuart' as const,
+  },
+  plugins: {
+    legend: {
+      position: 'top' as const,
+      labels: {
+        usePointStyle: true,
+        boxWidth: 6,
+        font: {
+          size: 13,
+        },
+      },
+      display: true,
+      align: 'center' as const,
+    },
+    tooltip: {
+      backgroundColor: 'rgba(255, 255, 255, 0.9)',
+      titleColor: '#000',
+      bodyColor: '#000',
+      bodyFont: {
+        size: 14,
+      },
+      titleFont: {
+        size: 16,
+        weight: 'bold' as const,
+      },
+      padding: 12,
+      boxPadding: 8,
+      borderColor: 'rgba(0, 0, 0, 0.1)',
+      borderWidth: 1,
+      callbacks: {
+        label: function (context: any) {
+          const value = parseFloat(context.parsed.y)
+          const label = context.dataset.label
+          let mood = ''
+
+          if (value >= 4) mood = 'Отлично'
+          else if (value >= 3.5) mood = 'Хорошо'
+          else if (value >= 2.5) mood = 'Удовлетворительно'
+          else mood = 'Плохо'
+
+          return `${label}: ${value} — ${mood}`
+        },
+      },
+      usePointStyle: true,
+    },
+  },
+  scales: {
+    x: {
+      grid: {
+        display: false,
+      },
+      ticks: {
+        font: {
+          size: 12,
+        },
+      },
+    },
+    y: {
+      min: 0,
+      max: 5,
+      ticks: {
+        stepSize: 1,
+        precision: 0,
+        font: {
+          size: 12,
+        },
+      },
+      grid: {
+        color: 'rgba(0, 0, 0, 0.05)',
+      },
+    },
+  },
+  elements: {
+    line: {
+      tension: 0.4,
+    },
+    point: {
+      radius: 5,
+      hoverRadius: 7,
+    },
+  },
+}
+
+// Update the period change handler
+watch(selectedDateRange, async (newValue) => {
+  // Destroy existing chart before fetching new data
+  if (chart) {
+    chart.destroy()
+    chart = null
+  }
+
+  // Fetch new data for the selected period
+  await fetchAnalytics()
+})
+
+// Change the chart options to include an annotation line
 async function renderChart() {
   // Don't try to render if we're already in the middle of rendering
   if (isChartRendering.value) {
@@ -287,11 +437,61 @@ async function renderChart() {
     // Create data for the chart
     const data = getChartData()
 
-    // Create the chart with appropriate type and options
+    // Calculate the average of all values for the annotation line
+    const allValues = data.datasets[0].data as number[]
+    const averageValue =
+      allValues.length > 0 ? allValues.reduce((sum, val) => sum + val, 0) / allValues.length : 0
+
+    // Create gradient for area chart
+    if (ctx) {
+      const gradient = ctx.createLinearGradient(0, 0, 0, 400)
+      gradient.addColorStop(0, 'rgba(33, 150, 243, 0.3)')
+      gradient.addColorStop(1, 'rgba(33, 150, 243, 0.05)')
+
+      // Apply gradient to dataset
+      if (data.datasets[0]) {
+        data.datasets[0].backgroundColor = gradient
+      }
+    }
+
+    // Create chart options with the average line annotation
+    const chartOptionsWithAnnotation = {
+      ...chartOptions,
+      plugins: {
+        ...chartOptions.plugins,
+        annotation: {
+          annotations: {
+            line1: {
+              type: 'line' as const,
+              yMin: averageValue,
+              yMax: averageValue,
+              borderColor: 'rgba(128, 128, 128, 0.6)',
+              borderWidth: 2,
+              borderDash: [6, 4],
+              label: {
+                display: true,
+                content: `Среднее: ${averageValue.toFixed(2)}`,
+                position: 'end' as const,
+                backgroundColor: 'rgba(128, 128, 128, 0.7)',
+                color: 'white',
+                font: {
+                  size: 12,
+                  weight: 'bold' as const,
+                },
+                padding: 4,
+                xAdjust: -80,
+              },
+            },
+          },
+        },
+      },
+    }
+
+    // Create the chart
     chart = new Chart(ctx, {
-      type: chartType.value,
+      type: 'line',
       data,
-      options: getChartOptions(),
+      options: chartOptionsWithAnnotation,
     })
 
     console.log('Chart successfully rendered')
@@ -301,18 +501,6 @@ async function renderChart() {
     isChartRendering.value = false
   }
 }
-
-// Improve the period change handler
-watch(selectedDateRange, async (newValue) => {
-  // Destroy existing chart before fetching new data
-  if (chart) {
-    chart.destroy()
-    chart = null
-  }
-
-  // Fetch new data for the selected period
-  await fetchAnalytics()
-})
 
 // Update the fetchAnalytics function
 async function fetchAnalytics() {
@@ -342,191 +530,6 @@ async function fetchAnalytics() {
   } finally {
     loading.value = false
   }
-}
-
-function formatDateLabel(dateString: string): string {
-  const date = new Date(dateString)
-  return new Intl.DateTimeFormat('ru-RU', {
-    day: 'numeric',
-    month: selectedDateRange.value === 'year' ? 'short' : 'long',
-  }).format(date)
-}
-
-function getChartData() {
-  const sorted = [...analyticsData.value].sort(
-    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-  )
-
-  return {
-    labels: sorted.map((d) => formatDateLabel(d.date)),
-    datasets: [
-      {
-        label: 'Здоровье',
-        backgroundColor: 'rgba(66, 165, 245, 0.7)',
-        borderColor: '#42A5F5',
-        data: sorted.map((d) => d.score.health),
-        tension: 0.3,
-      },
-      {
-        label: 'Энергия',
-        backgroundColor: 'rgba(102, 187, 106, 0.7)',
-        borderColor: '#66BB6A',
-        data: sorted.map((d) => d.score.energy),
-        tension: 0.3,
-      },
-      {
-        label: 'Настроение',
-        backgroundColor: 'rgba(255, 167, 38, 0.7)',
-        borderColor: '#FFA726',
-        data: sorted.map((d) => d.score.mood),
-        tension: 0.3,
-      },
-      {
-        label: 'Сон',
-        backgroundColor: 'rgba(126, 87, 194, 0.7)',
-        borderColor: '#7E57C2',
-        data: sorted.map((d) => d.score.sleep),
-        tension: 0.3,
-      },
-      {
-        label: 'Спокойствие',
-        backgroundColor: 'rgba(236, 64, 122, 0.7)',
-        borderColor: '#EC407A',
-        data: sorted.map((d) => d.score.calmness),
-        tension: 0.3,
-      },
-      {
-        label: 'Удовлетворённость',
-        backgroundColor: 'rgba(38, 166, 154, 0.7)',
-        borderColor: '#26A69A',
-        data: sorted.map((d) => d.score.satisfaction),
-        tension: 0.3,
-      },
-    ],
-  }
-}
-
-const barChartOptions = {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: {
-      position: 'top' as const,
-      labels: { usePointStyle: true },
-      display: true,
-      align: 'center' as const,
-    },
-    tooltip: {
-      callbacks: {
-        label: function (context: any) {
-          const value = context.parsed.y
-          const label = context.dataset.label
-          let mood = ''
-
-          if (value >= 4) mood = 'Отлично'
-          else if (value >= 3) mood = 'Нормально'
-          else if (value >= 2) mood = 'Низко'
-          else mood = 'Плохо'
-
-          return `${label}: ${value} — ${mood}`
-        },
-      },
-    },
-  },
-  scales: {
-    x: {
-      stacked: true,
-      grid: {
-        display: false,
-      },
-    },
-    y: {
-      stacked: true,
-      min: 0,
-      max: 30, // Increased max to accommodate 6 metrics stacked (6 × 5 = 30)
-      ticks: {
-        stepSize: 5,
-        precision: 0,
-      },
-      grid: {
-        color: 'rgba(0, 0, 0, 0.05)',
-      },
-    },
-  },
-  barPercentage: 0.8,
-  categoryPercentage: 0.9,
-}
-
-const lineChartOptions = {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: {
-      position: 'top' as const,
-      labels: { usePointStyle: true },
-      display: true,
-      align: 'center' as const,
-    },
-    tooltip: {
-      callbacks: {
-        label: function (context: any) {
-          const value = context.parsed.y
-          const label = context.dataset.label
-          let mood = ''
-
-          if (value >= 4) mood = 'Отлично'
-          else if (value >= 3) mood = 'Нормально'
-          else if (value >= 2) mood = 'Низко'
-          else mood = 'Плохо'
-
-          return `${label}: ${value} — ${mood}`
-        },
-      },
-    },
-  },
-  scales: {
-    x: {
-      grid: {
-        display: false,
-      },
-    },
-    y: {
-      min: 0,
-      max: 5,
-      ticks: {
-        stepSize: 1,
-        precision: 0,
-      },
-      grid: {
-        color: 'rgba(0, 0, 0, 0.05)',
-      },
-    },
-  },
-  elements: {
-    line: {
-      tension: 0.3,
-      fill: false,
-    },
-    point: {
-      radius: 4,
-      hoverRadius: 6,
-    },
-  },
-}
-
-function getChartOptions() {
-  return chartType.value === 'bar' ? barChartOptions : lineChartOptions
-}
-
-async function setChartType(type: 'bar' | 'line') {
-  chartType.value = type
-  // Destroy existing chart before recreating
-  if (chart) {
-    chart.destroy()
-    chart = null
-  }
-  await nextTick()
-  renderChart()
 }
 
 onMounted(async () => {
@@ -671,23 +674,13 @@ const currentDateRangeText = computed(() => {
       <div v-if="hasAnalyticsData()" class="chart-panel panel">
         <div class="panel-header">
           <h2>Динамика показателей</h2>
-          <div class="chart-controls">
-            <Button
-              :class="{ active: chartType === 'bar' }"
-              icon="pi pi-chart-bar"
-              text
-              rounded
-              @click="setChartType('bar')"
-              v-tooltip.top="'Столбчатая диаграмма'"
-            />
-            <Button
-              :class="{ active: chartType === 'line' }"
-              icon="pi pi-chart-line"
-              text
-              rounded
-              @click="setChartType('line')"
-              v-tooltip.top="'Линейная диаграмма'"
-            />
+          <div class="chart-info-tooltip">
+            <i
+              class="pi pi-info-circle"
+              v-tooltip.bottom="
+                'Показан средний общий балл от 0 до 5, рассчитанный на основе всех показателей'
+              "
+            ></i>
           </div>
         </div>
         <div class="chart-container" ref="chartContainerRef">
@@ -977,22 +970,15 @@ const currentDateRangeText = computed(() => {
 }
 
 /* Chart Panel */
-.chart-controls {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.chart-controls .active {
-  color: var(--primary-color, #4318ff);
-  background-color: rgba(67, 24, 255, 0.1);
-}
-
 .chart-container {
   flex: 1;
   height: 400px;
   min-height: 400px;
   position: relative;
   width: 100%;
+  background: linear-gradient(180deg, rgba(243, 244, 246, 0.3) 0%, rgba(255, 255, 255, 0) 100%);
+  border-radius: 8px;
+  padding: 1rem;
 }
 
 /* Status Panels */
@@ -1020,6 +1006,35 @@ const currentDateRangeText = computed(() => {
 
 .info-icon {
   color: #3b82f6;
+}
+
+/* Chart Annotation */
+.chart-annotation {
+  display: none;
+}
+
+/* Panel Header with Info Icon */
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.chart-info-tooltip {
+  display: flex;
+  align-items: center;
+}
+
+.chart-info-tooltip i {
+  color: var(--text-color-secondary, #8f9bba);
+  font-size: 1.1rem;
+  cursor: help;
+  transition: color 0.2s;
+}
+
+.chart-info-tooltip i:hover {
+  color: var(--primary-color, #4318ff);
 }
 
 /* Responsive Adjustments */
