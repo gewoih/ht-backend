@@ -42,6 +42,30 @@
           <small v-if="v$.password.$error" class="p-error">
             {{ v$.password.$errors[0].$message }}
           </small>
+          <ul class="password-rules-list">
+            <li :class="{ passed: isPasswordMinLength }">
+              <i
+                :class="isPasswordMinLength ? 'pi pi-check-circle passed' : 'pi pi-times-circle'"
+              />
+              Не менее 8 символов
+            </li>
+            <li :class="{ passed: isPasswordUniqueChars }">
+              <i
+                :class="isPasswordUniqueChars ? 'pi pi-check-circle passed' : 'pi pi-times-circle'"
+              />
+              Минимум 4 уникальных символа
+            </li>
+            <li :class="{ passed: isPasswordLowerUpper }">
+              <i
+                :class="isPasswordLowerUpper ? 'pi pi-check-circle passed' : 'pi pi-times-circle'"
+              />
+              Строчная и заглавная буква
+            </li>
+            <li :class="{ passed: isPasswordDigit }">
+              <i :class="isPasswordDigit ? 'pi pi-check-circle passed' : 'pi pi-times-circle'" />
+              Хотя бы одна цифра
+            </li>
+          </ul>
         </div>
 
         <div class="form-group">
@@ -96,7 +120,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onBeforeUnmount } from 'vue'
+import { ref, onBeforeUnmount, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useVuelidate } from '@vuelidate/core'
 import { required, email as emailValidator, helpers } from '@vuelidate/validators'
@@ -105,6 +129,7 @@ import PasswordField from '../components/ui/PasswordField.vue'
 import Button from 'primevue/button'
 import { register, confirmEmail, sendEmailConfirmation } from '../services/auth.service'
 import EmailVerificationDialog from '../components/ui/EmailVerificationDialog.vue'
+import 'primeicons/primeicons.css'
 
 const router = useRouter()
 
@@ -127,6 +152,20 @@ const resendDisabled = ref(false)
 const resendCountdown = ref(0)
 const resendTimer = ref<number | null>(null)
 
+// Custom password validators
+function minLength8(value: string) {
+  return value.length >= 8
+}
+function minUniqueChars4(value: string) {
+  return new Set(value).size >= 4
+}
+function hasLowerAndUpper(value: string) {
+  return /[a-z]/.test(value) && /[A-Z]/.test(value)
+}
+function hasDigit(value: string) {
+  return /\d/.test(value)
+}
+
 // Validation rules
 const rules = {
   username: {
@@ -138,6 +177,16 @@ const rules = {
   },
   password: {
     required: helpers.withMessage('Необходимо указать пароль', required),
+    minLength8: helpers.withMessage('Пароль должен содержать не менее 8 символов', minLength8),
+    minUniqueChars4: helpers.withMessage(
+      'Пароль должен содержать минимум 4 уникальных символа',
+      minUniqueChars4
+    ),
+    hasLowerAndUpper: helpers.withMessage(
+      'Пароль должен содержать хотя бы одну строчную и одну заглавную букву',
+      hasLowerAndUpper
+    ),
+    hasDigit: helpers.withMessage('Пароль должен содержать хотя бы одну цифру', hasDigit),
   },
   confirmPassword: {
     required: helpers.withMessage('Пожалуйста, подтвердите пароль', required),
@@ -149,6 +198,11 @@ const rules = {
 }
 
 const v$ = useVuelidate(rules, { username, email, password, confirmPassword })
+
+const isPasswordMinLength = computed(() => minLength8(password.value))
+const isPasswordUniqueChars = computed(() => minUniqueChars4(password.value))
+const isPasswordLowerUpper = computed(() => hasLowerAndUpper(password.value))
+const isPasswordDigit = computed(() => hasDigit(password.value))
 
 function isVerificationCodeComplete() {
   return codeDigits.value.every((digit) => digit.trim() !== '')
@@ -187,7 +241,11 @@ async function handleSubmit() {
         codeInputRefs.value[0].focus()
       }
     } else {
-      errorMessage.value = 'Аккаунт с таким email или логином уже существует'
+      if (response.error?.response?.status === 400) {
+        errorMessage.value = 'Аккаунт с таким email или логином уже существует'
+      } else {
+        errorMessage.value = 'Произошла ошибка при регистрации. Попробуйте позже.'
+      }
     }
   } catch (error) {
     errorMessage.value = 'Произошла ошибка при регистрации. Попробуйте позже.'
@@ -316,4 +374,28 @@ onBeforeUnmount(() => {
 
 <style scoped>
 /* Empty style block - all styles are imported from auth.css */
+.password-rules-list {
+  list-style: none;
+  margin: 0.5rem 0 0 0;
+  padding: 0;
+  font-size: 0.97rem;
+}
+.password-rules-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #888;
+  margin-bottom: 0.2rem;
+  transition: color 0.2s;
+}
+.password-rules-list li.passed {
+  color: #22c55e;
+}
+.password-rules-list i {
+  font-size: 1.1rem;
+  min-width: 1.2rem;
+}
+.password-rules-list i.passed {
+  color: #22c55e;
+}
 </style>
