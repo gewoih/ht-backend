@@ -1,10 +1,7 @@
 using System.Text;
 using HT.Application.Interfaces;
-using HT.Domain.Entities;
 using HT.Domain.Entities.Identity;
-using HT.Infrastructure.Identity;
 using HT.Infrastructure.Persistence;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -28,14 +25,14 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddIdentity<User, Role>(o =>
     {
+        o.User.RequireUniqueEmail = true;
         o.SignIn.RequireConfirmedEmail = true;
         o.Password.RequireNonAlphanumeric = false;
         o.Password.RequiredUniqueChars = 4;
         o.Password.RequiredLength = 8;
     })
     .AddEntityFrameworkStores<HtContext>()
-    .AddDefaultTokenProviders()
-    .AddErrorDescriber<RussianIdentityErrorDescriber>();
+    .AddDefaultTokenProviders();
 
 builder.Services.AddAuthentication(options =>
     {

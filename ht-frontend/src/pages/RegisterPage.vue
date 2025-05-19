@@ -183,16 +183,14 @@ async function handleSubmit() {
       await sendCodeToEmail()
 
       // Focus first code input field
-      setTimeout(() => {
-        if (codeInputRefs.value[0]) {
-          codeInputRefs.value[0].focus()
-        }
-      }, 100)
+      if (codeInputRefs.value[0]) {
+        codeInputRefs.value[0].focus()
+      }
     } else {
-      errorMessage.value = 'Ошибка регистрации. Пожалуйста, попробуйте еще раз.'
+      errorMessage.value = 'Аккаунт с таким email или логином уже существует'
     }
   } catch (error) {
-    errorMessage.value = 'Произошла ошибка при регистрации.'
+    errorMessage.value = 'Произошла ошибка при регистрации. Попробуйте позже.'
     console.error(error)
   } finally {
     isLoading.value = false
@@ -300,7 +298,7 @@ function handlePaste(event: ClipboardEvent) {
 
     // If all fields are filled, try to submit
     if (isVerificationCodeComplete()) {
-      setTimeout(() => confirmEmailVerification(), 100)
+      confirmEmailVerification()
     }
   }
 

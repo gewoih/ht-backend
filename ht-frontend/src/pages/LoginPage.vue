@@ -109,9 +109,9 @@ async function handleSubmit() {
       if (response.error?.response?.data?.message) {
         errorMessage.value = response.error.response.data.message
       } else if (response.error?.response?.status === 401) {
-        errorMessage.value = 'Неверный email или пароль. Попробуйте еще раз.'
+        errorMessage.value = 'Неверный email или пароль'
       } else {
-        errorMessage.value = 'Не удалось войти. Пожалуйста, попробуйте еще раз.'
+        errorMessage.value = 'Неизвестная ошибка входа. Попробуйте позже.'
       }
     }
   } catch (error) {
