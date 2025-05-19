@@ -49,11 +49,7 @@ public class AuthService(
 
     public async Task<TokenPairDto?> SignInAsync(SignInRequest request, CancellationToken ct = default)
     {
-        var user = await userManager.Users
-            .Include(user => user.Subscriptions)
-            .FirstOrDefaultAsync(user => user.Email.ToLower() == request.Email.ToLower(),
-                cancellationToken: ct);
-
+        var user = await userManager.FindByEmailAsync(request.Email);
         if (user is null)
             return null;
 
@@ -61,6 +57,7 @@ public class AuthService(
         if (!result.Succeeded)
             return null;
 
+        await context.Entry(user).Collection(x => x.Subscriptions).LoadAsync(ct);
         var accessToken = JwtService.GenerateJwtToken(user);
         if (string.IsNullOrEmpty(accessToken))
             return null;
@@ -122,10 +119,7 @@ public class AuthService(
 
     public async Task<bool> SendEmailConfirmation(string email, CancellationToken ct = default)
     {
-        var user = await context.Users
-            .Where(user => user.Email.ToLower() == email.ToLower())
-            .FirstOrDefaultAsync(ct);
-        
+        var user = await userManager.FindByEmailAsync(email);
         if (user is null)
             return false;
         
@@ -138,7 +132,9 @@ public class AuthService(
 
     public async Task<bool> ConfirmEmailAsync(string email, int code, CancellationToken ct = default)
     {
-        var user = await context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower(), ct);
+        var user = await userManager.FindByEmailAsync(email);
+        if (user == null)
+            return false;
 
         var token = await context.EmailConfirmationCodes
             .Where(emailConfirmationCode => emailConfirmationCode.UserId == user.Id &&
