@@ -14,8 +14,7 @@ public class LeaderboardService(ICurrentUserService currentUserService, HtContex
             .Select(group => new
             {
                 UserId = group.Key,
-                Score = group.Sum(journalLog =>
-                    journalLog.HabitLogs.Where(habitLog => habitLog.Value).Sum(habitLog => habitLog.Habit.Impact))
+                Score = group.Sum(journalLog => journalLog.HabitLogs.Sum(habitLog => habitLog.Habit.Impact))
             })
             .OrderByDescending(group => group.Score)
             .ToDictionaryAsync(key => key.UserId, value => value.Score);
