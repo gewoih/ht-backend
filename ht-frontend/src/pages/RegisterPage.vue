@@ -75,90 +75,38 @@
     </div>
   </div>
 
-  <!-- Email verification dialog -->
-  <Dialog
+  <!-- Email verification dialog extracted to a component -->
+  <EmailVerificationDialog
     v-model:visible="showVerificationDialog"
-    modal
-    header="Подтверждение email"
-    :closable="false"
-    class="verification-dialog"
-    :breakpoints="{ '960px': '80vw', '640px': '90vw' }"
-    :style="{ width: '400px' }"
-    :pt="{ root: { style: 'max-height: 90vh; overflow-y: auto' } }"
-  >
-    <div class="verification-container">
-      <div class="verification-icon">
-        <i class="pi pi-envelope"></i>
-      </div>
-
-      <h3 class="verification-title">Проверьте ваш почтовый ящик</h3>
-
-      <p class="verification-text">
-        Мы отправили код подтверждения на <strong>{{ email }}</strong
-        >. Введите 6-значный код для завершения регистрации.
-      </p>
-
-      <div v-if="isSendingCode" class="sending-code-indicator">
-        <i class="pi pi-spin pi-spinner"></i>
-        <span>Отправка кода...</span>
-      </div>
-
-      <div class="code-input-container" @paste="handlePaste">
-        <div v-for="(digit, index) in 6" :key="index" class="code-digit-wrapper">
-          <InputText
-            :ref="
-              (el) => {
-                if (el) codeInputRefs[index] = el
-              }
-            "
-            v-model="codeDigits[index]"
-            class="code-digit-input"
-            maxlength="1"
-            @input="handleCodeDigitInput(index)"
-            @keydown="handleCodeDigitKeydown($event, index)"
-            :class="{ 'p-invalid': verificationCodeError }"
-          />
-        </div>
-      </div>
-
-      <small v-if="verificationCodeError" class="p-error verification-error">
-        {{ verificationCodeError }}
-      </small>
-
-      <div class="verification-actions">
-        <Button
-          label="Подтвердить"
-          @click="confirmEmailVerification"
-          :loading="isVerifying"
-          :disabled="isVerifying || !isVerificationCodeComplete()"
-          class="verify-button"
-        />
-      </div>
-
-      <div class="resend-code">
-        Не получили код?
-        <a href="#" @click.prevent="resendCode" :class="{ disabled: resendDisabled }">
-          {{ resendDisabled ? `Отправить повторно (${resendCountdown}с)` : 'Отправить повторно' }}
-        </a>
-      </div>
-    </div>
-  </Dialog>
+    :email="email"
+    :is-sending-code="isSendingCode"
+    :is-verifying="isVerifying"
+    :verification-code-error="verificationCodeError"
+    :resend-disabled="resendDisabled"
+    :resend-countdown="resendCountdown"
+    :code-digits="codeDigits"
+    @update:code-digits="
+      (val) => {
+        if (JSON.stringify(codeDigits) !== JSON.stringify(val)) codeDigits = val
+      }
+    "
+    @confirm="confirmEmailVerification"
+    @resend="resendCode"
+  />
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { useVuelidate } from '@vuelidate/core'
-import { required, email as emailValidator, sameAs, helpers } from '@vuelidate/validators'
+import { required, email as emailValidator, helpers } from '@vuelidate/validators'
 import InputText from 'primevue/inputtext'
 import PasswordField from '../components/ui/PasswordField.vue'
 import Button from 'primevue/button'
-import Dialog from 'primevue/dialog'
 import { register, confirmEmail, sendEmailConfirmation } from '../services/auth.service'
-import { useAuthStore } from '../stores/authStore'
+import EmailVerificationDialog from '../components/ui/EmailVerificationDialog.vue'
 
 const router = useRouter()
-const authStore = useAuthStore()
 
 // Form data
 const username = ref('')
@@ -201,43 +149,6 @@ const rules = {
 }
 
 const v$ = useVuelidate(rules, { username, email, password, confirmPassword })
-
-// Handle code input
-function handleCodeDigitInput(index: number) {
-  // Only allow numeric inputs
-  codeDigits.value[index] = codeDigits.value[index].replace(/[^0-9]/g, '')
-
-  // Move to next input when digit is entered
-  if (codeDigits.value[index] && index < 5) {
-    codeInputRefs.value[index + 1]?.focus()
-  }
-
-  // Clear error when user is typing
-  verificationCodeError.value = ''
-
-  // If all digits are filled, check if we should submit
-  if (isVerificationCodeComplete() && index === 5) {
-    confirmEmailVerification()
-  }
-}
-
-function handleCodeDigitKeydown(event: KeyboardEvent, index: number) {
-  // Handle backspace - move to previous input when current is empty
-  if (event.key === 'Backspace' && !codeDigits.value[index] && index > 0) {
-    codeInputRefs.value[index - 1]?.focus()
-  }
-
-  // Handle arrow keys for navigation
-  if (event.key === 'ArrowLeft' && index > 0) {
-    event.preventDefault()
-    codeInputRefs.value[index - 1]?.focus()
-  }
-
-  if (event.key === 'ArrowRight' && index < 5) {
-    event.preventDefault()
-    codeInputRefs.value[index + 1]?.focus()
-  }
-}
 
 function isVerificationCodeComplete() {
   return codeDigits.value.every((digit) => digit.trim() !== '')

@@ -15,7 +15,6 @@ public class AuthService(
     UserManager<User> userManager,
     SignInManager<User> signInManager,
     IEmailService emailService,
-    ICurrentUserService currentUserService,
     HtContext context)
     : IAuthService
 {
@@ -132,7 +131,7 @@ public class AuthService(
         
         var code = await emailService.CreateEmailConfirmationCodeAsync(user, ct);
         await emailService.SendEmailAsync(email, "Код подтверждения",
-            $"Ваш код подтверждения в сервисе Track-me.ru: {code}", ct);
+            $"Ваш код подтверждения в сервисе TrackMe: {code}", ct);
         
         return true;
     }

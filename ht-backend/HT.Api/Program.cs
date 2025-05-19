@@ -74,7 +74,11 @@ builder.Services.AddScoped<IInsightService, InsightService>();
 builder.Services.AddScoped<IUserJournalService, UserJournalService>();
 builder.Services.AddScoped<IUserAnalyticsService, UserAnalyticsService>();
 builder.Services.AddScoped<ILeaderboardService, LeaderboardService>();
-builder.Services.AddScoped<IEmailService, EmailService>();
+
+if (builder.Environment.IsDevelopment())
+    builder.Services.AddScoped<IEmailService, FakeEmailService>();
+else
+    builder.Services.AddScoped<IEmailService, EmailService>();
 
 var app = builder.Build();
 using var scope = app.Services.CreateScope();

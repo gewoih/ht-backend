@@ -103,7 +103,7 @@ async function handleSubmit() {
 
     if (response.success) {
       window.dispatchEvent(new CustomEvent('auth:login-success'))
-      router.push('/')
+      router.push('/journal')
     } else {
       // Handle specific error from the response if available
       if (response.error?.response?.data?.message) {
