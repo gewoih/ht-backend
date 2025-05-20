@@ -267,6 +267,14 @@ function processUpgrade() {
   position: relative;
 }
 
+.habits-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+  gap: 12px;
+}
+
 .habits-header h2 {
   text-align: center;
   font-size: 1.5rem;
@@ -479,6 +487,10 @@ function processUpgrade() {
 }
 
 @media (max-width: 768px) {
+  .habits-header {
+    flex-wrap: wrap;
+  }
+
   .limit-indicator {
     flex-direction: column;
     align-items: center;
