@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /api/
+Sitemap: https://track-me.ru/sitemap.xml
+Host: https://track-me.ru
