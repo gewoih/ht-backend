@@ -1,30 +1,48 @@
 <template>
   <div class="habit-details-container">
-    <div v-if="loading" class="details-loading">
-      <ProgressSpinner />
-      <p>Загрузка информации...</p>
-    </div>
-    <div v-else-if="error" class="details-error">
-      <Message severity="error">{{ error }}</Message>
-    </div>
-    <div v-else-if="details" class="details-content">
-      <h3>{{ habitName }}</h3>
-
-      <div class="impact-indicator" :class="impactClass">
-        <span>Влияние:</span>
-        <strong>{{ details.impact }}</strong>
+    <div v-if="isSubscriptionExpired" class="subscription-expired-overlay">
+      <div class="expired-content">
+        <i class="pi pi-lock expired-icon"></i>
+        <h2>Подписка истекла</h2>
+        <p>
+          Доступ ко всем функциям временно ограничен. Пожалуйста, продлите подписку для продолжения
+          использования сервиса.
+        </p>
+        <Button
+          label="Продлить подписку"
+          icon="pi pi-credit-card"
+          class="p-button-lg"
+          @click="goToProfile"
+        />
       </div>
-
-      <div class="details-section">
-        <h4>Описание</h4>
-        <p>{{ details.description }}</p>
+    </div>
+    <div v-else>
+      <div v-if="loading" class="details-loading">
+        <ProgressSpinner />
+        <p>Загрузка информации...</p>
       </div>
+      <div v-else-if="error" class="details-error">
+        <Message severity="error">{{ error }}</Message>
+      </div>
+      <div v-else-if="details" class="details-content">
+        <h3>{{ habitName }}</h3>
 
-      <Divider />
+        <div class="impact-indicator" :class="impactClass">
+          <span>Влияние:</span>
+          <strong>{{ details.impact }}</strong>
+        </div>
 
-      <div class="details-section">
-        <h4>Рекомендация</h4>
-        <p>{{ details.recommendation }}</p>
+        <div class="details-section">
+          <h4>Описание</h4>
+          <p>{{ details.description }}</p>
+        </div>
+
+        <Divider />
+
+        <div class="details-section">
+          <h4>Рекомендация</h4>
+          <p>{{ details.recommendation }}</p>
+        </div>
       </div>
     </div>
   </div>
@@ -36,7 +54,11 @@ import { loadHabitDetails } from '../../services/habits.service'
 import ProgressSpinner from 'primevue/progressspinner'
 import Message from 'primevue/message'
 import Divider from 'primevue/divider'
+import Button from 'primevue/button'
 import { HabitDetails } from '../../types/habit-details'
+import { useUserStore } from '../../stores/userStore'
+import { storeToRefs } from 'pinia'
+import { useRouter } from 'vue-router'
 
 const props = defineProps<{
   habitId: string
@@ -46,6 +68,13 @@ const props = defineProps<{
 const details = ref<HabitDetails | null>(null)
 const loading = ref(false)
 const error = ref('')
+
+const userStore = useUserStore()
+const { isSubscriptionExpired } = storeToRefs(userStore)
+const router = useRouter()
+function goToProfile() {
+  router.push('/profile')
+}
 
 async function fetchDetails() {
   if (!props.habitId) return
@@ -192,5 +221,31 @@ const impactClass = computed(() => {
   line-height: 1.5;
   color: #555;
   font-size: 1rem;
+}
+
+.subscription-expired-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.96);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.expired-content {
+  background: white;
+  border-radius: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  padding: 3rem 2rem;
+  text-align: center;
+  max-width: 400px;
+}
+.expired-icon {
+  font-size: 3rem;
+  color: #1976d2;
+  margin-bottom: 1.5rem;
 }
 </style>

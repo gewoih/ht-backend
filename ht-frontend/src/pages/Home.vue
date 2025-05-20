@@ -311,28 +311,7 @@
         <div class="pricing-cards">
           <div class="pricing-card">
             <div class="pricing-header">
-              <h3>Базовый</h3>
-              <div class="pricing-price">
-                <span class="price">Бесплатно</span>
-                <span class="period">навсегда</span>
-              </div>
-            </div>
-            <div class="pricing-features">
-              <ul>
-                <li><i class="pi pi-check"></i> Выбор до 10 привычек</li>
-                <li><i class="pi pi-check"></i> Ежедневный дневник</li>
-                <li><i class="pi pi-check"></i> Оценка 6 показателей самочувствия</li>
-                <li><i class="pi pi-check"></i> Базовая аналитика</li>
-                <li><i class="pi pi-check"></i> Графики динамики показателей</li>
-                <li><i class="pi pi-check"></i> Напоминания</li>
-                <li><i class="pi pi-times"></i> Доступ ко всем 50+ привычкам</li>
-              </ul>
-            </div>
-          </div>
-          <div class="pricing-card highlighted">
-            <div class="popular-badge">Популярный</div>
-            <div class="pricing-header">
-              <h3>Премиум</h3>
+              <h3>Месячный</h3>
               <div class="pricing-price">
                 <span class="price">349 ₽</span>
                 <span class="period">/ месяц</span>
@@ -340,19 +319,51 @@
             </div>
             <div class="pricing-features">
               <ul>
-                <li><i class="pi pi-check"></i> Доступ ко всем 50+ привычкам</li>
-                <li><i class="pi pi-check"></i> Ежедневный дневник</li>
-                <li><i class="pi pi-check"></i> Оценка 6 показателей самочувствия</li>
-                <li><i class="pi pi-check"></i> Расширенная ИИ-аналитика</li>
-                <li><i class="pi pi-check"></i> Графики динамики показателей</li>
+                <li><i class="pi pi-check"></i> Полный доступ ко всем функциям</li>
+                <li><i class="pi pi-check"></i> Ежедневный дневник и аналитика</li>
                 <li><i class="pi pi-check"></i> Приоритетная поддержка</li>
-                <li><i class="pi pi-check"></i> Ранний доступ к новым функциям</li>
+              </ul>
+            </div>
+          </div>
+          <div class="pricing-card highlighted">
+            <div class="popular-badge">2 месяца бесплатно</div>
+            <div class="pricing-header">
+              <h3>Годовой</h3>
+              <div class="pricing-price">
+                <span class="price">3490 ₽</span>
+                <span class="period">/ год</span>
+              </div>
+            </div>
+            <div class="pricing-features">
+              <ul>
+                <li><i class="pi pi-check"></i> Полный доступ ко всем функциям</li>
+                <li><i class="pi pi-check"></i> Ежедневный дневник и аналитика</li>
+                <li><i class="pi pi-check"></i> Приоритетная поддержка</li>
+                <li><i class="pi pi-gift"></i> 2 месяца бесплатно</li>
               </ul>
             </div>
           </div>
         </div>
       </div>
     </section>
+
+    <!-- Subscription Expired Overlay -->
+    <div v-if="isSubscriptionExpired" class="subscription-expired-overlay">
+      <div class="expired-content">
+        <i class="pi pi-lock expired-icon"></i>
+        <h2>Подписка истекла</h2>
+        <p>
+          Доступ ко всем функциям временно ограничен. Пожалуйста, продлите подписку для продолжения
+          использования сервиса.
+        </p>
+        <Button
+          label="Продлить подписку"
+          icon="pi pi-credit-card"
+          class="p-button-lg"
+          @click="router.push('/profile')"
+        />
+      </div>
+    </div>
 
     <!-- Final CTA -->
     <section class="cta">
@@ -379,8 +390,12 @@
 import { ref, computed, onMounted } from 'vue'
 import Button from 'primevue/button'
 import { useRouter } from 'vue-router'
+import { useUserStore } from '../stores/userStore'
+import { storeToRefs } from 'pinia'
 
 const router = useRouter()
+const userStore = useUserStore()
+const { isSubscriptionExpired } = storeToRefs(userStore)
 
 // Scroll to section function
 function scrollToSection(sectionId: string) {
@@ -1037,5 +1052,31 @@ onMounted(() => {
   .features-grid {
     grid-template-columns: 1fr; /* 1 column on mobile */
   }
+}
+
+.subscription-expired-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(255, 255, 255, 0.96);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.expired-content {
+  background: white;
+  border-radius: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  padding: 3rem 2rem;
+  text-align: center;
+  max-width: 400px;
+}
+.expired-icon {
+  font-size: 3rem;
+  color: var(--primary-color);
+  margin-bottom: 1.5rem;
 }
 </style>

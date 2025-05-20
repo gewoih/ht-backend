@@ -28,14 +28,14 @@ const saveSuccess = ref(false)
 const saveError = ref('')
 
 const detailsPopup = ref<{ habit: Habit } | null>(null)
-const showUpgradeDialog = ref(false)
-
-const isLimitReached = computed(() => {
-  if (userStore.isPremium) return false
-  return selectedHabits.value.size >= userStore.subscriptionLimits.maxHabits
-})
 
 const loadDataOnce = ref(false)
+
+const allHabitIds = computed(() => habitStore.allHabits.map((h) => h.id))
+const allSelected = computed(
+  () =>
+    allHabitIds.value.length > 0 && allHabitIds.value.every((id) => selectedHabits.value.has(id))
+)
 
 onMounted(async () => {
   if (!userStore.user) {
@@ -65,23 +65,23 @@ async function loadHabitsData() {
 }
 
 function isDisabled(habitId: string): boolean {
-  if (selectedHabits.value.has(habitId)) return false
-
-  if (userStore.isPremium) return false
-
-  return isLimitReached.value
+  // No more limits, always return false
+  return false
 }
 
 function toggleHabit(id: string) {
-  if (!selectedHabits.value.has(id) && isLimitReached.value && !userStore.isPremium) {
-    showUpgradeInfo()
-    return
-  }
-
   if (selectedHabits.value.has(id)) {
     selectedHabits.value.delete(id)
   } else {
     selectedHabits.value.add(id)
+  }
+}
+
+function toggleSelectAll() {
+  if (allSelected.value) {
+    selectedHabits.value.clear()
+  } else {
+    selectedHabits.value = new Set(allHabitIds.value)
   }
 }
 
@@ -123,24 +123,6 @@ function closeDialog() {
 const showDetails = (habit: Habit) => {
   detailsPopup.value = { habit }
 }
-
-function showUpgradeInfo() {
-  showUpgradeDialog.value = true
-}
-
-function processUpgrade() {
-  if (toastRef.value) {
-    toastRef.value.add({
-      severity: 'info',
-      summary: 'Переход на Premium',
-      detail: 'Функция оплаты подписки находится в разработке',
-      life: 3000,
-    })
-  } else {
-    console.log('Toast service not available')
-  }
-  showUpgradeDialog.value = false
-}
 </script>
 
 <template>
@@ -154,18 +136,15 @@ function processUpgrade() {
   >
     <div class="habits-info-container">
       <Toast ref="toastRef" position="bottom-right" />
-      <div v-if="!userStore.isLoading && !userStore.isPremium" class="subscription-info">
-        <div class="limit-indicator">
-          <span class="selected-count" :class="{ 'limit-reached': isLimitReached }">
-            {{ selectedHabits.size }} / {{ userStore.subscriptionLimits.maxHabits }}
-          </span>
-          <span v-if="isLimitReached" class="limit-warning">
-            Достигнут лимит привычек.
-            <Button class="upgrade-btn" text @click="showUpgradeInfo">Перейти на Premium</Button>
-          </span>
-        </div>
+      <div class="actions-bar">
+        <Button
+          :label="allSelected ? 'Снять выделение' : 'Выбрать все'"
+          icon="pi pi-check-square"
+          class="select-all-btn"
+          @click="toggleSelectAll"
+          text
+        />
       </div>
-
       <div class="save-feedback">
         <span v-if="saveSuccess" class="save-success">Сохранено!</span>
         <span v-if="saveError" class="save-error">Ошибка: {{ saveError }}</span>
@@ -189,14 +168,13 @@ function processUpgrade() {
                 :key="habit.id"
                 class="habit-list-item"
                 @click="toggleHabit(habit.id)"
-                :class="{ disabled: isDisabled(habit.id) }"
+                :class="{ selected: selectedHabits.has(habit.id) }"
               >
                 <div class="habit-item-content">
                   <input
                     type="checkbox"
                     :checked="selectedHabits.has(habit.id)"
                     class="habit-checkbox"
-                    :disabled="isDisabled(habit.id)"
                     readonly
                   />
                   <span class="habit-list-label">{{ habit.name }}</span>
@@ -231,30 +209,6 @@ function processUpgrade() {
       :style="{ width: '90%', maxWidth: '500px' }"
     >
       <HabitDetails :habitId="detailsPopup.habit.id" :habitName="detailsPopup.habit.name" />
-    </Dialog>
-
-    <Dialog v-model:visible="showUpgradeDialog" header="Перейти на Premium" :modal="true">
-      <div class="upgrade-dialog-content">
-        <h3>Преимущества Premium-подписки:</h3>
-        <ul class="benefits-list">
-          <li><i class="pi pi-check"></i> Без ограничений на количество привычек</li>
-          <li><i class="pi pi-check"></i> Расширенная аналитика и отчеты</li>
-          <li><i class="pi pi-check"></i> Приоритетная поддержка</li>
-        </ul>
-        <div class="pricing">
-          <div class="price">499 руб/месяц</div>
-          <div class="billing-note">Оплата раз в месяц, можно отменить в любое время</div>
-        </div>
-      </div>
-      <template #footer>
-        <Button label="Закрыть" icon="pi pi-times" text @click="showUpgradeDialog = false" />
-        <Button
-          label="Оформить подписку"
-          icon="pi pi-check"
-          severity="success"
-          @click="processUpgrade"
-        />
-      </template>
     </Dialog>
   </Dialog>
 </template>
@@ -495,5 +449,20 @@ function processUpgrade() {
     flex-direction: column;
     align-items: center;
   }
+}
+
+.actions-bar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+.select-all-btn {
+  font-weight: 600;
+  color: var(--primary-color);
+}
+.habit-list-item.selected {
+  background: #e3eefd;
+  color: #1976d2;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.08);
 }
 </style>

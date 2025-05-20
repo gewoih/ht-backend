@@ -73,52 +73,53 @@
           </div>
 
           <div v-else-if="userStore.user" class="subscription-section">
-            <div class="subscription-card">
-              <div class="subscription-type" :class="{ premium: userStore.isPremium }">
-                {{ userStore.isPremium ? 'PREMIUM' : 'БЕСПЛАТНАЯ' }}
+            <div v-if="userStore.isSubscriptionExpired" class="subscription-expired-block">
+              <i class="pi pi-lock expired-icon"></i>
+              <h3>Подписка истекла</h3>
+              <p>
+                Доступ ко всем функциям временно ограничен. Пожалуйста, продлите подписку для
+                продолжения использования сервиса.
+              </p>
+              <Button
+                label="Продлить подписку"
+                icon="pi pi-credit-card"
+                class="p-button-lg"
+                @click="showUpgradeDialog = true"
+              />
+            </div>
+            <div v-else class="subscription-card">
+              <div class="subscription-type paid">
+                {{
+                  userStore.user.subscription.endDate && userStore.isActiveSubscription
+                    ? userStore.user.subscription.type === 1
+                      ? 'Платная (Месяц/Год)'
+                      : 'Платная'
+                    : 'Нет активной подписки'
+                }}
               </div>
-
               <div class="subscription-details">
                 <div class="subscription-status">
-                  <Badge value="Активна" severity="success" />
+                  <Badge
+                    :value="userStore.isActiveSubscription ? 'Активна' : 'Неактивна'"
+                    :severity="userStore.isActiveSubscription ? 'success' : 'danger'"
+                  />
                 </div>
-
+                <div v-if="userStore.user.subscription.startDate" class="subscription-expires">
+                  Начало: {{ formatDate(userStore.user.subscription.startDate) }}
+                </div>
                 <div v-if="userStore.user.subscription.endDate" class="subscription-expires">
                   Действует до: {{ formatDate(userStore.user.subscription.endDate) }}
                 </div>
               </div>
-            </div>
-
-            <div class="subscription-limits">
-              <h3>Лимиты</h3>
-              <div class="limit-item">
-                <div class="limit-label">Максимальное количество привычек</div>
-                <div class="limit-value" :class="{ unlimited: userStore.isPremium }">
-                  {{
-                    userStore.isPremium ? 'Без ограничений' : userStore.subscriptionLimits.maxHabits
-                  }}
-                </div>
+              <div class="subscription-actions">
+                <Button
+                  label="Управление подпиской"
+                  icon="pi pi-cog"
+                  @click="showUpgradeDialog = true"
+                  severity="secondary"
+                  class="manage-button p-button-outlined"
+                />
               </div>
-            </div>
-
-            <div class="subscription-actions">
-              <Button
-                v-if="!userStore.isPremium"
-                label="Перейти на Premium"
-                icon="pi pi-star"
-                @click="showUpgradeDialog = true"
-                severity="success"
-                class="upgrade-button"
-              />
-
-              <Button
-                v-else
-                label="Управление подпиской"
-                icon="pi pi-cog"
-                @click="showUpgradeDialog = true"
-                severity="secondary"
-                class="manage-button p-button-outlined"
-              />
             </div>
           </div>
         </div>
@@ -163,40 +164,56 @@
 
     <Dialog
       v-model:visible="showUpgradeDialog"
-      :header="userStore.isPremium ? 'Управление подпиской' : 'Переход на Premium'"
-      :style="{ width: '90%', maxWidth: '450px' }"
+      :header="userStore.isSubscriptionExpired ? 'Продлить подписку' : 'Управление подпиской'"
+      :style="{
+        width: '100%',
+        maxWidth: '600px',
+        background: '#f8fafc',
+        borderRadius: '18px',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.10)',
+      }"
       :modal="true"
     >
-      <div class="upgrade-dialog-content">
-        <template v-if="!userStore.isPremium">
-          <h3>Преимущества Premium-подписки:</h3>
-          <ul class="benefits-list">
-            <li><i class="pi pi-check"></i> Без ограничений на количество привычек</li>
-            <li><i class="pi pi-check"></i> Расширенная аналитика и отчеты</li>
-            <li><i class="pi pi-check"></i> Приоритетная поддержка</li>
-          </ul>
-          <div class="pricing">
-            <div class="price">349 руб/месяц</div>
-            <div class="billing-note">Оплата раз в месяц, можно отменить в любое время</div>
+      <div class="upgrade-dialog-modern">
+        <h3 class="upgrade-title">Выберите тариф</h3>
+        <div class="modern-pricing-row">
+          <div class="modern-pricing-card">
+            <div class="modern-pricing-header">Месячный</div>
+            <div class="modern-pricing-price">
+              <span class="modern-price">349 ₽</span>
+              <span class="modern-period">/ месяц</span>
+            </div>
+            <ul class="modern-benefits-list">
+              <li><i class="pi pi-check"></i> Полный доступ ко всем функциям</li>
+              <li><i class="pi pi-check"></i> Ежедневный дневник и аналитика</li>
+              <li><i class="pi pi-check"></i> Приоритетная поддержка</li>
+            </ul>
+            <Button label="Выбрать" icon="pi pi-check" class="modern-choose-btn" />
           </div>
-        </template>
-        <template v-else>
-          <h3>Информация о вашей подписке</h3>
-          <p>У вас активна Premium-подписка.</p>
+          <div class="modern-pricing-card highlighted">
+            <div class="modern-popular-badge">2 месяца бесплатно</div>
+            <div class="modern-pricing-header">Годовой</div>
+            <div class="modern-pricing-price">
+              <span class="modern-price">3490 ₽</span>
+              <span class="modern-period">/ год</span>
+            </div>
+            <ul class="modern-benefits-list">
+              <li><i class="pi pi-check"></i> Полный доступ ко всем функциям</li>
+              <li><i class="pi pi-check"></i> Ежедневный дневник и аналитика</li>
+              <li><i class="pi pi-check"></i> Приоритетная поддержка</li>
+              <li><i class="pi pi-gift"></i> 2 месяца бесплатно</li>
+            </ul>
+            <Button label="Выбрать" icon="pi pi-check" class="modern-choose-btn highlighted" />
+          </div>
+        </div>
+        <div v-if="userStore.isActiveSubscription" class="current-subscription-info-modern">
+          <h4>Текущая подписка</h4>
           <p>Дата начала: {{ formatDate(userStore.user?.subscription.startDate) }}</p>
           <p>Действует до: {{ formatDate(userStore.user?.subscription.endDate) }}</p>
-        </template>
+        </div>
       </div>
-
       <template #footer>
         <Button label="Закрыть" icon="pi pi-times" @click="showUpgradeDialog = false" text />
-        <Button
-          v-if="!userStore.isPremium"
-          label="Оформить подписку"
-          icon="pi pi-check"
-          severity="success"
-          autofocus
-        />
       </template>
     </Dialog>
 
@@ -463,45 +480,128 @@ function formatDate(dateString?: string) {
   margin-top: 1rem;
 }
 
-.upgrade-dialog-content {
+.upgrade-dialog-modern {
+  background: #f8fafc;
+  border-radius: 18px;
+  padding: 2rem 1.5rem 1.5rem 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+.upgrade-title {
   text-align: center;
-  padding: 1rem 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  color: #1976d2;
 }
-
-.benefits-list {
-  text-align: left;
-  margin: 1.5rem 0;
-  padding-left: 1rem;
+.modern-pricing-row {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  align-items: stretch;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
 }
-
-.benefits-list li {
-  margin-bottom: 0.75rem;
+.modern-pricing-card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(25, 118, 210, 0.06);
+  padding: 2rem 1.5rem 1.5rem 1.5rem;
+  min-width: 240px;
+  max-width: 300px;
+  flex: 1 1 240px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  border: 2px solid transparent;
+  transition: border 0.2s;
+}
+.modern-pricing-card.highlighted {
+  border: 2px solid #1976d2;
+  background: #f0f7ff;
+}
+.modern-popular-badge {
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1976d2;
+  color: #fff;
+  padding: 4px 18px;
+  border-radius: 16px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.1);
+}
+.modern-pricing-header {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #1976d2;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+.modern-pricing-price {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 5px;
+  margin-bottom: 1.2rem;
+}
+.modern-price {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #1976d2;
+}
+.modern-period {
+  color: #6c757d;
+  font-size: 1.1rem;
+}
+.modern-benefits-list {
+  list-style: none;
+  padding: 0;
+  margin: 1.2rem 0 1.5rem 0;
+  width: 100%;
+}
+.modern-benefits-list li {
   display: flex;
   align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  color: #333;
+  margin-bottom: 0.7rem;
 }
-
-.benefits-list li i {
-  color: #10b981;
-  margin-right: 0.75rem;
+.modern-benefits-list li i {
+  color: #22c55e;
+  font-size: 1.1rem;
 }
-
-.pricing {
-  margin-top: 2rem;
-  padding: 1rem;
-  background-color: #f0f7ff;
-  border-radius: 8px;
-}
-
-.price {
-  font-size: 1.75rem;
+.modern-choose-btn {
+  width: 100%;
   font-weight: 700;
-  color: var(--primary-color);
+  font-size: 1.1rem;
+  margin-top: auto;
+  border-radius: 8px;
+  background: #e3eefd;
+  color: #1976d2;
+  border: 1px solid #1976d2;
+  transition: background 0.2s, color 0.2s;
 }
-
-.billing-note {
-  font-size: 0.85rem;
-  color: #6c757d;
-  margin-top: 0.5rem;
+.modern-choose-btn.highlighted {
+  background: #1976d2;
+  color: #fff;
+  border: 1px solid #1976d2;
+}
+.modern-choose-btn:hover {
+  background: #1976d2;
+  color: #fff;
+}
+.current-subscription-info-modern {
+  margin-top: 2rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: left;
+  box-shadow: 0 1px 4px rgba(25, 118, 210, 0.04);
 }
 
 /* Responsive adjustments */

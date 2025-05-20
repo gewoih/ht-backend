@@ -27,6 +27,7 @@ public class AuthService(
 
     public async Task<bool> RegisterAsync(RegisterRequest request, CancellationToken ct = default)
     {
+        var currentDateUtc = DateTime.UtcNow;
         var user = new User
         {
             UserName = request.Username,
@@ -37,8 +38,8 @@ public class AuthService(
                 {
                     IsActive = true,
                     Type = SubscriptionType.Free,
-                    StartDate = DateTime.UtcNow,
-                    EndDate = DateTime.MaxValue
+                    StartDate = currentDateUtc,
+                    EndDate = currentDateUtc.AddDays(30)
                 }
             }
         };

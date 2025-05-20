@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { User, SubscriptionType, SubscriptionLimits } from '../types/user'
-import { getCurrentUser, getSubscriptionLimits } from '../services/user.service'
+import { User, SubscriptionType } from '../types/user'
+import { getCurrentUser } from '../services/user.service'
 import { useHabitStore } from './habitStore'
 
 export const useUserStore = defineStore('user', () => {
@@ -10,21 +10,30 @@ export const useUserStore = defineStore('user', () => {
   const hasError = ref(false)
   const errorMessage = ref<string | null>(null)
 
-  const habitStore = useHabitStore()
+  // Subscription status
+  const isActiveSubscription = computed(() => {
+    if (!user.value) return false
+    if (!user.value.subscription) return false
+    const now = Date.now()
+    return (
+      user.value.subscription.endDate && now < new Date(user.value.subscription.endDate).getTime()
+    )
+  })
 
-  const isPremium = computed(() => user.value?.subscription.type === SubscriptionType.PREMIUM)
+  const isSubscriptionExpired = computed(() => {
+    if (!user.value) return false
+    if (!user.value.subscription) return false
+    const now = Date.now()
+    return (
+      user.value.subscription.endDate && now >= new Date(user.value.subscription.endDate).getTime()
+    )
+  })
 
-  const subscriptionLimits = computed<SubscriptionLimits>(() =>
-    user.value ? getSubscriptionLimits(user.value.subscription.type) : { maxHabits: 0 }
-  )
-
-  const remainingHabitSlots = computed(
-    () => subscriptionLimits.value.maxHabits - habitStore.userHabitsCount
-  )
-
-  const canAddMoreHabits = computed(
-    () => isPremium.value || habitStore.userHabitsCount < subscriptionLimits.value.maxHabits
-  )
+  // Plan info: infer from endDate and type (no explicit plan field)
+  const subscriptionType = computed(() => {
+    if (!user.value) return null
+    return user.value.subscription?.type || null // SubscriptionType
+  })
 
   async function loadUserProfile() {
     try {
@@ -32,8 +41,8 @@ export const useUserStore = defineStore('user', () => {
       hasError.value = false
       errorMessage.value = null
       user.value = await getCurrentUser()
-
-      // Also load habits count
+      // Also load habits count (if needed elsewhere)
+      const habitStore = useHabitStore()
       await habitStore.loadUserHabitIds()
     } catch (err: any) {
       console.error('Error loading user profile:', err)
@@ -49,10 +58,9 @@ export const useUserStore = defineStore('user', () => {
     isLoading,
     hasError,
     errorMessage,
-    isPremium,
-    subscriptionLimits,
-    remainingHabitSlots,
-    canAddMoreHabits,
+    isActiveSubscription,
+    isSubscriptionExpired,
+    subscriptionType,
     loadUserProfile,
   }
 })

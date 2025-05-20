@@ -13,10 +13,16 @@ import ProgressBar from 'primevue/progressbar'
 import ScoreWithInfo from '../components/ui/ScoreWithInfo.vue'
 import { ScoreDescriptions } from '../data/score-descriptions'
 import HabitsInfo from '../components/habits/HabitsInfo.vue'
+import { useUserStore } from '../stores/userStore'
+import { storeToRefs } from 'pinia'
+import { useRouter } from 'vue-router'
 
 const journalStore = useJournalStore()
 const habitStore = useHabitStore()
 const showHabitsDialog = ref(false)
+const userStore = useUserStore()
+const { isSubscriptionExpired } = storeToRefs(userStore)
+const router = useRouter()
 
 const updateHabit = (habitId: string, value: boolean) => {
   const habit = journalStore.habits.find((h) => h.id === habitId)
@@ -78,6 +84,10 @@ const onHabitsUpdated = (updatedHabits) => {
   }
 }
 
+const goToProfile = () => {
+  router.push('/profile')
+}
+
 watch(
   () => journalStore.selectedDate,
   () => {
@@ -89,6 +99,22 @@ watch(
 
 <template>
   <div class="habit-journal">
+    <div v-if="isSubscriptionExpired" class="subscription-expired-overlay">
+      <div class="expired-content">
+        <i class="pi pi-lock expired-icon"></i>
+        <h2>Подписка истекла</h2>
+        <p>
+          Доступ ко всем функциям временно ограничен. Пожалуйста, продлите подписку для продолжения
+          использования сервиса.
+        </p>
+        <Button
+          label="Продлить подписку"
+          icon="pi pi-credit-card"
+          class="p-button-lg"
+          @click="goToProfile"
+        />
+      </div>
+    </div>
     <Card class="journal-card">
       <template #header>
         <div class="journal-header">
@@ -718,5 +744,31 @@ watch(
   .error-container {
     padding: 2rem 1rem;
   }
+}
+
+.subscription-expired-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(255, 255, 255, 0.96);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.expired-content {
+  background: white;
+  border-radius: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  padding: 3rem 2rem;
+  text-align: center;
+  max-width: 400px;
+}
+.expired-icon {
+  font-size: 3rem;
+  color: var(--primary-color);
+  margin-bottom: 1.5rem;
 }
 </style>
