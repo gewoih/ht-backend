@@ -75,6 +75,31 @@
               <i class="pi pi-chevron-down"></i>
             </div>
           </Button>
+          <div v-if="showProfileMenu" class="profile-dropdown">
+            <div class="profile-info">
+              <Avatar
+                :label="getUserInitial(userName)"
+                shape="circle"
+                class="dropdown-avatar"
+                :style="{ backgroundColor: generateAvatarColor(userName) }"
+              />
+              <div class="user-details">
+                <h3>{{ userName || 'User' }}</h3>
+                <p>{{ userEmail }}</p>
+              </div>
+            </div>
+            <div class="dropdown-menu">
+              <Button
+                v-for="item in profileMenuItems"
+                :key="item.label"
+                :label="item.label"
+                :icon="item.icon"
+                text
+                class="dropdown-item"
+                @click="handleProfileAction(item.action)"
+              />
+            </div>
+          </div>
         </template>
         <template v-else>
           <Button label="Войти в аккаунт" text @click="router.push('/login')" />
@@ -184,33 +209,6 @@
             />
           </div>
         </template>
-      </div>
-    </div>
-
-    <!-- Profile Dropdown -->
-    <div v-if="showProfileMenu" class="profile-dropdown">
-      <div class="profile-info">
-        <Avatar
-          :label="getUserInitial(userName)"
-          shape="circle"
-          class="dropdown-avatar"
-          :style="{ backgroundColor: generateAvatarColor(userName) }"
-        />
-        <div class="user-details">
-          <h3>{{ userName || 'User' }}</h3>
-          <p>{{ userEmail }}</p>
-        </div>
-      </div>
-      <div class="dropdown-menu">
-        <Button
-          v-for="item in profileMenuItems"
-          :key="item.label"
-          :label="item.label"
-          :icon="item.icon"
-          text
-          class="dropdown-item"
-          @click="handleProfileAction(item.action)"
-        />
       </div>
     </div>
   </header>
@@ -627,18 +625,12 @@ const handleMobileAction = (action: string) => {
 .profile-dropdown {
   position: absolute;
   top: 100%;
-  right: 0;
   background: white;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   min-width: 300px;
   max-height: 400px;
   overflow-y: auto;
-}
-
-.profile-dropdown {
-  right: 1rem;
-  width: 250px;
 }
 
 /* Profile Dropdown */
