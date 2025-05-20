@@ -15,23 +15,23 @@ import AppFooter from './components/layout/AppFooter.vue'
 
 <style>
 body,
-html,
-#app {
+html {
   height: 100%;
   min-height: 100vh;
-  overflow-y: auto;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-body {
   margin: 0;
   padding: 0;
-  background-color: #f5f5f5;
+  width: 100%;
+}
+
+#app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
 }
 
 .content-wrapper {
+  flex: 1 0 auto;
   width: 100%;
   max-width: 100%;
   margin: 0 auto;

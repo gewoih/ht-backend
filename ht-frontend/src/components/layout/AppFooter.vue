@@ -1,38 +1,33 @@
 <template>
   <footer class="app-footer">
     <div class="footer-content">
-      <div class="footer-brand">
-        <img src="../../assets/logo.svg" alt="Habit Tracker Logo" class="footer-logo" />
-        <span class="footer-title">Habit Tracker</span>
-      </div>
       <nav class="footer-nav">
-        <a href="/" class="footer-link">Главная</a>
-        <a href="/about" class="footer-link">О проекте</a>
-        <a href="/faq" class="footer-link">FAQ</a>
-        <a href="/contact" class="footer-link">Связаться</a>
+        <Button label="О проекте" text class="footer-link" @click="$router.push('/about')" />
+        <Button label="FAQ" text class="footer-link" @click="$router.push('/faq')" />
+        <Button label="Связаться" text class="footer-link" @click="$router.push('/contact')" />
       </nav>
-      <div class="footer-social">
-        <a href="#" class="footer-social-link" title="Telegram"><i class="pi pi-telegram"></i></a>
-        <a href="#" class="footer-social-link" title="VK"><i class="pi pi-vk"></i></a>
-        <a href="#" class="footer-social-link" title="GitHub"><i class="pi pi-github"></i></a>
-      </div>
     </div>
     <div class="footer-bottom">
-      <span>© {{ new Date().getFullYear() }} Habit Tracker. Все права защищены.</span>
+      <span>© {{ new Date().getFullYear() }} TrackMe. Все права защищены.</span>
     </div>
   </footer>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import Button from 'primevue/button'
+import { useRouter } from 'vue-router'
+const $router = useRouter()
+</script>
 
 <style scoped>
 .app-footer {
-  background: #f8f9fa;
+  background: #fff;
   border-top: 1px solid #e0e0e0;
   padding-top: 2rem;
   padding-bottom: 1rem;
   font-size: 1rem;
   color: #2c3e50;
+  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .footer-content {
@@ -46,38 +41,44 @@
   padding: 0 1rem;
 }
 
-.footer-brand {
+.logo-container {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 1rem;
 }
 
-.footer-logo {
-  width: 36px;
+.logo {
   height: 36px;
+  width: auto;
 }
 
-.footer-title {
-  font-weight: 700;
+.app-title {
   font-size: 1.2rem;
+  font-weight: 700;
   color: #4caf50;
+  margin: 0;
 }
 
 .footer-nav {
   display: flex;
-  gap: 1.5rem;
+  gap: 1rem;
+  flex: 1;
+  justify-content: center;
+  align-items: center;
 }
 
-.footer-link {
-  color: #2c3e50;
-  text-decoration: none;
-  transition: color 0.2s;
-  padding: 0.5rem 0;
-  display: inline-block;
+.footer-link.p-button {
+  font-weight: 500;
+  color: #666;
+  padding: 0.5rem 1rem;
+  transition: all 0.3s ease;
+  background: none;
+  border: none;
 }
 
-.footer-link:hover {
+.footer-link.p-button:hover {
   color: #4caf50;
+  background: rgba(76, 175, 80, 0.1);
 }
 
 .footer-social {
@@ -115,7 +116,6 @@
     padding-top: 1.5rem;
     margin-top: 2rem;
   }
-
   .footer-content {
     flex-direction: column;
     gap: 1.5rem;
@@ -129,11 +129,9 @@
     padding-top: 1.25rem;
     padding-bottom: 1rem;
   }
-
   .footer-content {
     gap: 1.25rem;
   }
-
   .footer-nav {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -141,22 +139,18 @@
     gap: 0.5rem 1rem;
     justify-content: center;
   }
-
-  .footer-link {
+  .footer-link.p-button {
     padding: 0.75rem 0;
     font-size: 0.95rem;
   }
-
   .footer-social {
     width: 100%;
     justify-content: center;
     gap: 1.5rem;
   }
-
   .footer-social-link {
     font-size: 1.5rem;
   }
-
   .footer-bottom {
     font-size: 0.85rem;
     margin-top: 1.25rem;

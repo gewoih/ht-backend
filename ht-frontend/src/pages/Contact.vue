@@ -1,168 +1,113 @@
 <template>
   <div class="contact-page">
-    <h1>Связаться с нами</h1>
-    <div class="contact-content">
-      <form class="contact-form" @submit.prevent="submitForm">
-        <label>
-          Ваше имя
-          <input v-model="name" type="text" required placeholder="Имя" />
-        </label>
-        <label>
-          Email для ответа
-          <input v-model="email" type="email" required placeholder="you@email.com" />
-        </label>
-        <label>
-          Сообщение
-          <textarea
-            v-model="message"
-            required
-            placeholder="Ваш вопрос или предложение..."
-            rows="5"
-          ></textarea>
-        </label>
-        <button type="submit">Отправить</button>
-        <div v-if="sent" class="contact-success">Спасибо! Ваше сообщение отправлено.</div>
-      </form>
-      <div class="contact-info">
-        <h2>Поддержка</h2>
-        <p>Если у вас есть вопросы, предложения или нужна помощь — напишите нам!</p>
-        <ul>
-          <li>
-            <b>Email:</b> <a href="mailto:support@habittracker.ru">support@habittracker.ru</a>
-          </li>
-          <li><b>Telegram:</b> <a href="#">@habittracker_support</a></li>
-        </ul>
-      </div>
+    <div class="contact-card">
+      <h1 class="contact-title">Связаться с нами</h1>
+      <p class="contact-description">
+        Если у вас есть вопросы, предложения или нужна помощь — мы всегда на связи!
+      </p>
+      <ul class="contact-list">
+        <li>
+          <i class="pi pi-envelope contact-icon"></i>
+          <span>Email:</span>
+          <a href="mailto:support@track-me.ru">support@track-me.ru</a>
+        </li>
+        <li>
+          <i class="pi pi-telegram contact-icon"></i>
+          <span>Telegram:</span>
+          <a href="#">@track-me-support</a>
+        </li>
+      </ul>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-const name = ref('')
-const email = ref('')
-const message = ref('')
-const sent = ref(false)
-const submitForm = () => {
-  sent.value = true
-  setTimeout(() => {
-    sent.value = false
-    name.value = ''
-    email.value = ''
-    message.value = ''
-  }, 3000)
-}
+// No logic needed for static contact info
 </script>
 
 <style scoped>
 .contact-page {
-  max-width: 700px;
-  margin: 0 auto;
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
   padding: 3rem 1rem 5rem 1rem;
 }
-.contact-page h1 {
+
+.contact-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(44, 62, 80, 0.08);
+  padding: 2.5rem 2rem 2rem 2rem;
+  max-width: 600px;
+  width: 100%;
   text-align: center;
-  margin-bottom: 2.5rem;
-  color: #2c3e50;
-}
-.contact-content {
-  display: flex;
-  gap: 3rem;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: center;
-}
-.contact-form {
-  background: #f8f9fa;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(44, 62, 80, 0.04);
-  padding: 2rem 1.5rem;
-  min-width: 300px;
-  flex: 1 1 320px;
   display: flex;
   flex-direction: column;
-  gap: 1.2rem;
+  gap: 2rem;
 }
-.contact-form label {
-  font-weight: 500;
+
+.contact-title {
+  font-size: 2rem;
+  font-weight: 700;
   color: #2c3e50;
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
+  margin-bottom: 0.5rem;
 }
-.contact-form input,
-.contact-form textarea {
-  border: 1px solid #cfd8dc;
-  border-radius: 6px;
-  padding: 0.6rem 0.8rem;
-  font-size: 1rem;
-  margin-top: 0.2rem;
-  background: #fff;
-  color: #2c3e50;
-  transition: border 0.2s;
-}
-.contact-form input:focus,
-.contact-form textarea:focus {
-  border: 1.5px solid #4caf50;
-  outline: none;
-}
-.contact-form button {
-  background: #4caf50;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 0.8rem 1.5rem;
-  font-size: 1.1rem;
-  font-weight: 600;
-  cursor: pointer;
-  margin-top: 0.5rem;
-  transition: background 0.2s;
-}
-.contact-form button:hover {
-  background: #388e3c;
-}
-.contact-success {
+
+.contact-description {
   color: #4caf50;
-  margin-top: 1rem;
-  font-weight: 600;
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
 }
-.contact-info {
-  min-width: 220px;
-  flex: 1 1 220px;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(44, 62, 80, 0.04);
-  padding: 2rem 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-.contact-info h2 {
-  color: #2c3e50;
-  margin-bottom: 0.7rem;
-}
-.contact-info ul {
+
+.contact-list {
   list-style: none;
   padding: 0;
   margin: 0;
-  color: #2c3e50;
-  font-size: 1rem;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 1.5rem;
 }
-.contact-info a {
+
+.contact-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-size: 1.08rem;
+  color: #2c3e50;
+  justify-content: flex-start;
+}
+
+.contact-icon {
+  font-size: 1.5rem;
   color: #4caf50;
-  text-decoration: none;
+  min-width: 1.5rem;
 }
-.contact-info a:hover {
+
+.contact-list a {
+  color: #1976d2;
+  text-decoration: none;
+  font-weight: 500;
+  margin-left: 0.3rem;
+  transition: color 0.2s;
+}
+
+.contact-list a:hover {
+  color: #4caf50;
   text-decoration: underline;
 }
-@media (max-width: 900px) {
-  .contact-content {
-    flex-direction: column;
-    gap: 2rem;
-    align-items: stretch;
+
+@media (max-width: 600px) {
+  .contact-card {
+    padding: 1.5rem 0.7rem 1.5rem 0.7rem;
+    max-width: 100%;
+  }
+  .contact-title {
+    font-size: 1.3rem;
+  }
+  .contact-description {
+    font-size: 1rem;
   }
 }
 </style>
