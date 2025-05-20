@@ -176,7 +176,7 @@
             <li><i class="pi pi-check"></i> Приоритетная поддержка</li>
           </ul>
           <div class="pricing">
-            <div class="price">499 руб/месяц</div>
+            <div class="price">349 руб/месяц</div>
             <div class="billing-note">Оплата раз в месяц, можно отменить в любое время</div>
           </div>
         </template>
