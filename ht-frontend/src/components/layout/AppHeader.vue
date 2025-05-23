@@ -6,63 +6,63 @@
         <h1 class="app-title">TrackMe</h1>
       </div>
 
-      <div class="menu-container">
-        <Button
-          v-for="menuItem in menuItems.filter((item) => !item.hasSubmenu)"
-          :key="menuItem.path"
-          :label="menuItem.label"
-          :text="true"
-          :class="{ 'active-menu': isActive(menuItem.path) }"
-          @click="navigateTo(menuItem.path)"
-        />
-
-        <!-- Analytics dropdown menu -->
-        <div class="analytics-menu-container" ref="analyticsMenuContainer">
+      <template v-if="isLoggedIn">
+        <div class="menu-container">
           <Button
-            ref="analyticsBtnRef"
-            :class="{ 'active-menu': isActive('/analytics') || isActive('/insights') }"
-            @click="toggleAnalyticsMenu"
-            text
-            aria-haspopup="true"
-            aria-controls="analytics_menu"
-            class="analytics-button"
-          >
-            <span>Аналитика</span>
-            <i
-              class="pi pi-chevron-down analytics-dropdown-icon"
-              :class="{ 'dropdown-active': showAnalyticsMenu }"
-            ></i>
-          </Button>
+            v-for="menuItem in menuItems.filter((item) => !item.hasSubmenu)"
+            :key="menuItem.path"
+            :label="menuItem.label"
+            :text="true"
+            :class="{ 'active-menu': isActive(menuItem.path) }"
+            @click="navigateTo(menuItem.path)"
+          />
 
-          <div
-            class="custom-menu-overlay"
-            v-if="showAnalyticsMenu"
-            @click="hideAnalyticsMenu"
-          ></div>
+          <!-- Analytics dropdown menu -->
+          <div class="analytics-menu-container" ref="analyticsMenuContainer">
+            <Button
+              ref="analyticsBtnRef"
+              :class="{ 'active-menu': isActive('/analytics') || isActive('/insights') }"
+              @click="toggleAnalyticsMenu"
+              text
+              aria-haspopup="true"
+              aria-controls="analytics_menu"
+              class="analytics-button"
+            >
+              <span>Аналитика</span>
+              <i
+                class="pi pi-chevron-down analytics-dropdown-icon"
+                :class="{ 'dropdown-active': showAnalyticsMenu }"
+              ></i>
+            </Button>
 
-          <div class="custom-analytics-menu" v-show="showAnalyticsMenu" @click.stop>
             <div
-              class="menu-item"
-              @click="navigateTo('/analytics/insights')"
-              :class="{ 'active-item': isActive('/analytics/insights') }"
-            >
-              <i class="pi pi-chart-bar"></i>
-              <span>Влияние привычек</span>
-            </div>
-            <div
-              class="menu-item"
-              @click="navigateTo('/analytics/chart')"
-              :class="{ 'active-item': isActive('/analytics/chart') }"
-            >
-              <i class="pi pi-chart-line"></i>
-              <span>График</span>
+              class="custom-menu-overlay"
+              v-if="showAnalyticsMenu"
+              @click="hideAnalyticsMenu"
+            ></div>
+
+            <div class="custom-analytics-menu" v-show="showAnalyticsMenu" @click.stop>
+              <div
+                class="menu-item"
+                @click="navigateTo('/analytics/insights')"
+                :class="{ 'active-item': isActive('/analytics/insights') }"
+              >
+                <i class="pi pi-chart-bar"></i>
+                <span>Влияние привычек</span>
+              </div>
+              <div
+                class="menu-item"
+                @click="navigateTo('/analytics/chart')"
+                :class="{ 'active-item': isActive('/analytics/chart') }"
+              >
+                <i class="pi pi-chart-line"></i>
+                <span>График</span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div class="user-actions">
-        <template v-if="isLoggedIn">
+        <div class="user-actions">
           <Button class="profile-btn" :text="true" @click="toggleProfileMenu">
             <div class="profile-content">
               <Avatar
@@ -100,20 +100,22 @@
               />
             </div>
           </div>
-        </template>
-        <template v-else>
+        </div>
+      </template>
+      <template v-else>
+        <div class="user-actions">
           <Button label="Войти в аккаунт" text @click="router.push('/login')" />
-        </template>
-      </div>
+        </div>
+      </template>
 
       <!-- Mobile Menu Toggle -->
-      <div class="mobile-menu-toggle">
+      <div class="mobile-menu-toggle" v-if="isLoggedIn">
         <Button icon="pi pi-bars" text @click="toggleMobileMenu" />
       </div>
     </div>
 
     <!-- Mobile Menu -->
-    <div class="mobile-menu" :class="{ 'mobile-menu-open': showMobileMenu }">
+    <div class="mobile-menu" :class="{ 'mobile-menu-open': showMobileMenu }" v-if="isLoggedIn">
       <div class="mobile-menu-header">
         <div class="logo-container">
           <img src="../../assets/logo.svg" alt="Habit Tracker Logo" class="logo" />
@@ -166,49 +168,29 @@
       </div>
 
       <div class="mobile-menu-footer">
-        <template v-if="isLoggedIn">
-          <div class="mobile-user-info">
-            <Avatar
-              :label="getUserInitial(userName)"
-              shape="circle"
-              class="mobile-avatar"
-              :style="{ backgroundColor: generateAvatarColor(userName) }"
-            />
-            <div class="mobile-user-details">
-              <h3>{{ userName || 'User' }}</h3>
-              <p>{{ userEmail }}</p>
-            </div>
+        <div class="mobile-user-info">
+          <Avatar
+            :label="getUserInitial(userName)"
+            shape="circle"
+            class="mobile-avatar"
+            :style="{ backgroundColor: generateAvatarColor(userName) }"
+          />
+          <div class="mobile-user-details">
+            <h3>{{ userName || 'User' }}</h3>
+            <p>{{ userEmail }}</p>
           </div>
-          <div class="mobile-user-actions">
-            <Button
-              v-for="item in profileMenuItems"
-              :key="item.label"
-              :label="item.label"
-              :icon="item.icon"
-              text
-              class="mobile-action-btn"
-              @click="handleMobileAction(item.action)"
-            />
-          </div>
-        </template>
-        <template v-else>
-          <div class="mobile-auth-buttons">
-            <Button
-              label="Войти"
-              icon="pi pi-sign-in"
-              outlined
-              class="mobile-login-btn"
-              @click="navigateToMobile('/login')"
-            />
-            <Button
-              label="Регистрация"
-              icon="pi pi-user-plus"
-              severity="primary"
-              class="mobile-register-btn"
-              @click="navigateToMobile('/register')"
-            />
-          </div>
-        </template>
+        </div>
+        <div class="mobile-user-actions">
+          <Button
+            v-for="item in profileMenuItems"
+            :key="item.label"
+            :label="item.label"
+            :icon="item.icon"
+            text
+            class="mobile-action-btn"
+            @click="handleMobileAction(item.action)"
+          />
+        </div>
       </div>
     </div>
   </header>

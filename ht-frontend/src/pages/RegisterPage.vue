@@ -12,8 +12,8 @@
             placeholder="Введите имя пользователя"
             :class="{ 'p-invalid': v$.username.$invalid && v$.username.$dirty }"
           />
-          <small v-if="v$.username.$error" class="p-error">
-            {{ v$.username.$errors[0].$message }}
+          <small v-if="isUsernameNonLatin" class="p-error">
+            Имя пользователя должно содержать только латинские буквы, цифры, "_" или "-"
           </small>
         </div>
 
@@ -25,9 +25,19 @@
             type="text"
             placeholder="Введите ваш email"
             :class="{ 'p-invalid': v$.email.$invalid && v$.email.$dirty }"
+            @input="v$.email.$touch()"
           />
-          <small v-if="v$.email.$error" class="p-error">
+          <small
+            v-if="
+              (v$.email.$dirty && v$.email.$invalid && v$.email.$errors.length) ||
+              (email.length > 0 && v$.email.$errors.length)
+            "
+            class="p-error"
+          >
             {{ v$.email.$errors[0].$message }}
+          </small>
+          <small v-else-if="isEmailNonLatin" class="p-error">
+            Email должен содержать только латинские буквы, цифры и символы @ . _ - +
           </small>
         </div>
 
@@ -86,7 +96,7 @@
             type="submit"
             label="Зарегистрироваться"
             :loading="isLoading"
-            :disabled="isLoading"
+            :disabled="isLoading || !isFormValid"
           />
         </div>
 
@@ -166,10 +176,25 @@ function hasDigit(value: string) {
   return /\d/.test(value)
 }
 
+// Custom validators
+function isLatinOnly(value: string) {
+  // Allows only Latin letters, numbers, underscores, and dashes
+  return /^[A-Za-z0-9_-]+$/.test(value)
+}
+
+function isLatinEmail(value: string) {
+  // Allows only Latin letters, numbers, and common email symbols
+  return /^[A-Za-z0-9@._\-+]+$/.test(value)
+}
+
 // Validation rules
 const rules = {
   username: {
     required: helpers.withMessage('Необходимо указать имя пользователя', required),
+    isLatinOnly: helpers.withMessage(
+      'Имя пользователя должно содержать только латинские буквы, цифры, "_" или "-"',
+      isLatinOnly
+    ),
   },
   email: {
     required: helpers.withMessage('Необходимо указать email', required),
@@ -204,6 +229,14 @@ const isPasswordUniqueChars = computed(() => minUniqueChars4(password.value))
 const isPasswordLowerUpper = computed(() => hasLowerAndUpper(password.value))
 const isPasswordDigit = computed(() => hasDigit(password.value))
 
+const isUsernameNonLatin = computed(() => {
+  return username.value.length > 0 && !isLatinOnly(username.value)
+})
+
+const isEmailNonLatin = computed(() => {
+  return email.value.length > 0 && !isLatinEmail(email.value)
+})
+
 function isVerificationCodeComplete() {
   return codeDigits.value.every((digit) => digit.trim() !== '')
 }
@@ -211,6 +244,10 @@ function isVerificationCodeComplete() {
 function getVerificationCode() {
   return codeDigits.value.join('')
 }
+
+const isFormValid = computed(() => {
+  return !v$.value.$invalid && !isUsernameNonLatin.value && !isEmailNonLatin.value
+})
 
 async function handleSubmit() {
   errorMessage.value = ''
