@@ -1,7 +1,8 @@
 using System.Text;
-using HT.Application.Interfaces;
-using HT.Domain.Entities.Identity;
-using HT.Infrastructure.Persistence;
+using HT.Api.Extensions;
+using HT.Core.Entities.Identity;
+using HT.Core.Infrastructure.Persistence;
+using HT.Core.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -104,5 +105,6 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllers();
+app.MapFeatureEndpoints();
+
 app.Run();
